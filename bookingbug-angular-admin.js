@@ -1943,6 +1943,162 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
+  angular.module('BBAdmin').directive('bookingTable', function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
+    var controller, link;
+    controller = function($scope) {
+      $scope.fields = ['id', 'datetime'];
+      $scope.getBookings = function() {
+        var params;
+        params = {
+          company: $scope.company
+        };
+        return AdminBookingService.query(params).then(function(bookings) {
+          return $scope.bookings = bookings;
+        });
+      };
+      $scope.newBooking = function() {
+        return ModalForm["new"]({
+          company: $scope.company,
+          title: 'New Booking',
+          new_rel: 'new_booking',
+          post_rel: 'bookings',
+          success: function(booking) {
+            return $scope.bookings.push(booking);
+          }
+        });
+      };
+      return $scope.edit = function(booking) {
+        return ModalForm.edit({
+          model: booking,
+          title: 'Edit Booking'
+        });
+      };
+    };
+    link = function(scope, element, attrs) {
+      if (scope.company) {
+        return scope.getBookings();
+      } else {
+        return AdminCompanyService.query(attrs).then(function(company) {
+          scope.company = company;
+          return scope.getBookings();
+        });
+      }
+    };
+    return {
+      controller: controller,
+      link: link,
+      templateUrl: 'booking_table_main.html'
+    };
+  });
+
+}).call(this);
+
+
+
+angular.module('BBAdmin.Directives').controller('CalController', function($scope) {
+    /* config object */
+    $scope.calendarConfig = {
+        height: 450,
+        editiable: true,
+        dayClick: function(){
+            scope.$apply($scope.alertEventOnClick);
+        }
+    };
+});
+
+(function() {
+  'use strict';
+  angular.module('BBAdmin.Directives').directive('bbPeopleList', function($rootScope) {
+    return {
+      restrict: 'AE',
+      replace: true,
+      scope: true,
+      controller: function($scope, $rootScope, PersonService, $q, BBModel, PersonModel) {
+        $rootScope.connection_started.then(function() {
+          return $scope.bb.company.getPeoplePromise().then(function(people) {
+            var i, len, person, results;
+            $scope.people = people;
+            results = [];
+            for (i = 0, len = people.length; i < len; i++) {
+              person = people[i];
+              results.push(person.show = true);
+            }
+            return results;
+          });
+        });
+        $scope.show_all_people = function() {
+          var i, len, ref, results, x;
+          ref = $scope.people;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push(x.show = true);
+          }
+          return results;
+        };
+        return $scope.hide_all_people = function() {
+          var i, len, ref, results, x;
+          ref = $scope.people;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push(x.show = false);
+          }
+          return results;
+        };
+      },
+      link: function(scope, element, attrs) {}
+    };
+  });
+
+  angular.module('BBAdmin.Directives').directive('bbBookingList', function() {
+    return {
+      restrict: 'AE',
+      replace: true,
+      scope: {
+        bookings: '=',
+        cancelled: '=',
+        params: '='
+      },
+      templateUrl: function(tElm, tAttrs) {
+        return tAttrs.template;
+      },
+      controller: function($scope, $filter) {
+        var status;
+        $scope.title = $scope.params.title;
+        status = $scope.params.status;
+        return $scope.$watch(function() {
+          return $scope.bookings;
+        }, function() {
+          var bookings, cancelled;
+          bookings = $scope.bookings;
+          cancelled = $scope.cancelled;
+          if (cancelled == null) {
+            cancelled = false;
+          }
+          if ((bookings != null)) {
+            bookings = $filter('filter')(bookings, function(booking) {
+              var ret;
+              ret = booking.is_cancelled === cancelled;
+              if ((status != null)) {
+                ret &= booking.hasStatus(status);
+              } else {
+                ret &= (booking.multi_status == null) || Object.keys(booking.multi_status).length === 0;
+              }
+              ret &= booking.status === 4;
+              return ret;
+            });
+            $scope.relevantBookings = $filter('orderBy')(bookings, 'datetime');
+          }
+          return $scope.relevantBookings != null ? $scope.relevantBookings : $scope.relevantBookings = [];
+        });
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
   'use strict';
   var bbAdminFilters;
 
@@ -2138,162 +2294,6 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
       return Admin_Slot;
 
     })(TimeSlotModel);
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('BBAdmin').directive('bookingTable', function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
-    var controller, link;
-    controller = function($scope) {
-      $scope.fields = ['id', 'datetime'];
-      $scope.getBookings = function() {
-        var params;
-        params = {
-          company: $scope.company
-        };
-        return AdminBookingService.query(params).then(function(bookings) {
-          return $scope.bookings = bookings;
-        });
-      };
-      $scope.newBooking = function() {
-        return ModalForm["new"]({
-          company: $scope.company,
-          title: 'New Booking',
-          new_rel: 'new_booking',
-          post_rel: 'bookings',
-          success: function(booking) {
-            return $scope.bookings.push(booking);
-          }
-        });
-      };
-      return $scope.edit = function(booking) {
-        return ModalForm.edit({
-          model: booking,
-          title: 'Edit Booking'
-        });
-      };
-    };
-    link = function(scope, element, attrs) {
-      if (scope.company) {
-        return scope.getBookings();
-      } else {
-        return AdminCompanyService.query(attrs).then(function(company) {
-          scope.company = company;
-          return scope.getBookings();
-        });
-      }
-    };
-    return {
-      controller: controller,
-      link: link,
-      templateUrl: 'booking_table_main.html'
-    };
-  });
-
-}).call(this);
-
-
-
-angular.module('BBAdmin.Directives').controller('CalController', function($scope) {
-    /* config object */
-    $scope.calendarConfig = {
-        height: 450,
-        editiable: true,
-        dayClick: function(){
-            scope.$apply($scope.alertEventOnClick);
-        }
-    };
-});
-
-(function() {
-  'use strict';
-  angular.module('BBAdmin.Directives').directive('bbPeopleList', function($rootScope) {
-    return {
-      restrict: 'AE',
-      replace: true,
-      scope: true,
-      controller: function($scope, $rootScope, PersonService, $q, BBModel, PersonModel) {
-        $rootScope.connection_started.then(function() {
-          return $scope.bb.company.getPeoplePromise().then(function(people) {
-            var i, len, person, results;
-            $scope.people = people;
-            results = [];
-            for (i = 0, len = people.length; i < len; i++) {
-              person = people[i];
-              results.push(person.show = true);
-            }
-            return results;
-          });
-        });
-        $scope.show_all_people = function() {
-          var i, len, ref, results, x;
-          ref = $scope.people;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            x = ref[i];
-            results.push(x.show = true);
-          }
-          return results;
-        };
-        return $scope.hide_all_people = function() {
-          var i, len, ref, results, x;
-          ref = $scope.people;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            x = ref[i];
-            results.push(x.show = false);
-          }
-          return results;
-        };
-      },
-      link: function(scope, element, attrs) {}
-    };
-  });
-
-  angular.module('BBAdmin.Directives').directive('bbBookingList', function() {
-    return {
-      restrict: 'AE',
-      replace: true,
-      scope: {
-        bookings: '=',
-        cancelled: '=',
-        params: '='
-      },
-      templateUrl: function(tElm, tAttrs) {
-        return tAttrs.template;
-      },
-      controller: function($scope, $filter) {
-        var status;
-        $scope.title = $scope.params.title;
-        status = $scope.params.status;
-        return $scope.$watch(function() {
-          return $scope.bookings;
-        }, function() {
-          var bookings, cancelled;
-          bookings = $scope.bookings;
-          cancelled = $scope.cancelled;
-          if (cancelled == null) {
-            cancelled = false;
-          }
-          if ((bookings != null)) {
-            bookings = $filter('filter')(bookings, function(booking) {
-              var ret;
-              ret = booking.is_cancelled === cancelled;
-              if ((status != null)) {
-                ret &= booking.hasStatus(status);
-              } else {
-                ret &= (booking.multi_status == null) || Object.keys(booking.multi_status).length === 0;
-              }
-              ret &= booking.status === 4;
-              return ret;
-            });
-            $scope.relevantBookings = $filter('orderBy')(bookings, 'datetime');
-          }
-          return $scope.relevantBookings != null ? $scope.relevantBookings : $scope.relevantBookings = [];
-        });
-      }
-    };
   });
 
 }).call(this);
