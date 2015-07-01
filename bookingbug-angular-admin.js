@@ -1943,44 +1943,6 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
-  'use strict';
-  var bbAdminFilters;
-
-  bbAdminFilters = angular.module('BBAdmin.Filters', []);
-
-  bbAdminFilters.filter('rag', function() {
-    return function(value, v1, v2) {
-      if (value <= v1) {
-        return "red";
-      } else if (value <= v2) {
-        return "amber";
-      } else {
-        return "green";
-      }
-    };
-  });
-
-  bbAdminFilters.filter('gar', function() {
-    return function(value, v1, v2) {
-      if (value <= v1) {
-        return "green";
-      } else if (value <= v2) {
-        return "amber";
-      } else {
-        return "red";
-      }
-    };
-  });
-
-  bbAdminFilters.filter('time', function($window) {
-    return function(v) {
-      return $window.sprintf("%02d:%02d", Math.floor(v / 60), v % 60);
-    };
-  });
-
-}).call(this);
-
-(function() {
   angular.module('BBAdmin').directive('bookingTable', function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
     var controller, link;
     controller = function($scope) {
@@ -2131,6 +2093,44 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           return $scope.relevantBookings != null ? $scope.relevantBookings : $scope.relevantBookings = [];
         });
       }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var bbAdminFilters;
+
+  bbAdminFilters = angular.module('BBAdmin.Filters', []);
+
+  bbAdminFilters.filter('rag', function() {
+    return function(value, v1, v2) {
+      if (value <= v1) {
+        return "red";
+      } else if (value <= v2) {
+        return "amber";
+      } else {
+        return "green";
+      }
+    };
+  });
+
+  bbAdminFilters.filter('gar', function() {
+    return function(value, v1, v2) {
+      if (value <= v1) {
+        return "green";
+      } else if (value <= v2) {
+        return "amber";
+      } else {
+        return "red";
+      }
+    };
+  });
+
+  bbAdminFilters.filter('time', function($window) {
+    return function(v) {
+      return $window.sprintf("%02d:%02d", Math.floor(v / 60), v % 60);
     };
   });
 
