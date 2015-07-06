@@ -1076,179 +1076,6 @@
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('BBAdminCtrl', function($controller, $scope, $location, $rootScope, halClient, $window, $http, $localCache, $q, BasketService, LoginService, AlertService, $sce, $element, $compile, $sniffer, $modal, $timeout, BBModel, BBWidget, SSOService, ErrorService, AppConfig, BookingCollections, SlotCollections, $state, AdminLoginService, AdminBookingService, $sessionStorage, $log, idleTimeout) {
-    angular.extend(this, $controller('BBCtrl', {
-      $scope: $scope,
-      $location: $location,
-      $rootScope: $rootScope,
-      $window: $window,
-      $http: $http,
-      $localCache: $localCache,
-      $q: $q,
-      halClient: halClient,
-      BasketService: BasketService,
-      LoginService: LoginService,
-      AlertService: AlertService,
-      $sce: $sce,
-      $element: $element,
-      $compile: $compile,
-      $sniffer: $sniffer,
-      $modal: $modal,
-      $timeout: $timeout,
-      BBModel: BBModel,
-      BBWidget: BBWidget,
-      SSOService: SSOService,
-      ErrorService: ErrorService,
-      AppConfig: AppConfig,
-      $sessionStorage: $sessionStorage
-    }));
-    $scope.loggedInDef = $q.defer();
-    $scope.logged_in = $scope.loggedInDef.promise;
-    $scope.nativeDate = Modernizr.inputtypes.date && Modernizr.touch;
-    $rootScope.bb = $scope.bb;
-    $scope.old_init = (function(_this) {
-      return function(prms) {
-        var comp_id;
-        comp_id = prms.company_id;
-        if (comp_id) {
-          $scope.bb.company_id = comp_id;
-          return $scope.channel_name = "private-company-" + $scope.bb.company_id;
-        }
-      };
-    })(this);
-    $scope.$on('newCheckout', (function(_this) {
-      return function(event, total) {
-        if (total.$has('admin_bookings') && BookingCollections.count() > 0) {
-          total.$get('admin_bookings').then(function(bookings) {
-            var b, booking, i, len, results;
-            results = [];
-            for (i = 0, len = bookings.length; i < len; i++) {
-              booking = bookings[i];
-              b = new BBModel.Admin.Booking(booking);
-              results.push(BookingCollections.checkItems(b));
-            }
-            return results;
-          });
-        }
-        if (total.$has('admin_slots') && SlotCollections.count() > 0) {
-          return total.$get('admin_slots').then(function(slots) {
-            var i, len, results, s, slot;
-            results = [];
-            for (i = 0, len = slots.length; i < len; i++) {
-              slot = slots[i];
-              s = new BBModel.Admin.Slot(slot);
-              results.push(SlotCollections.checkItems(s));
-            }
-            return results;
-          });
-        }
-      };
-    })(this));
-    $scope.$on('$stateChangeStart', function(event, toState, toStateParams) {
-      if (toState.name !== "login") {
-        return AdminLoginService.checkLogin().then(function() {
-          var company_id;
-          if (!AdminLoginService.isLoggedIn()) {
-            return $timeout(function() {
-              return $state.go('login');
-            });
-          } else {
-            company_id = AdminLoginService.user().company_id;
-            if (!$scope.init_widget_started) {
-              return $scope.initWidget({
-                company_id: company_id
-              });
-            }
-          }
-        });
-      }
-    });
-    $scope.pusherSubscribe = (function(_this) {
-      return function() {
-        var channelName, pusherEvent;
-        if (($scope.bb.company != null) && (typeof Pusher !== "undefined" && Pusher !== null)) {
-          if ($scope.pusher == null) {
-            $scope.pusher = new Pusher('c8d8cea659cc46060608', {
-              authEndpoint: "/api/v1/push/" + $scope.bb.company_id + "/pusher.json",
-              auth: {
-                headers: {
-                  'App-Id': 'f6b16c23',
-                  'App-Key': 'f0bc4f65f4fbfe7b4b3b7264b655f5eb',
-                  'Auth-Token': $sessionStorage.getItem('auth_token')
-                }
-              }
-            });
-          }
-          channelName = "private-c" + $scope.bb.company.id + "-w" + $scope.bb.company.numeric_widget_id;
-          if ($scope.pusher.channel(channelName) == null) {
-            $scope.pusher_channel = $scope.pusher.subscribe(channelName);
-            pusherEvent = function(res) {
-              if (res.id != null) {
-                return setTimeout((function() {
-                  var prms;
-                  prms = {
-                    company_id: $scope.bb.company_id,
-                    id: res.id,
-                    url: $scope.bb.api_url
-                  };
-                  return AdminBookingService.getBooking(prms).then(function(booking) {});
-                }), 2000);
-              }
-            };
-            $scope.pusher_channel.bind('booking', pusherEvent);
-            $scope.pusher_channel.bind('cancellation', pusherEvent);
-            return $scope.pusher_channel.bind('updating', pusherEvent);
-          }
-        }
-      };
-    })(this);
-    $rootScope.$on('company:setup', $scope.pusherSubscribe);
-    $scope.$on('$idleStart', function() {
-      if (AdminLoginService.isLoggedIn()) {
-        $log.info("User is idle");
-        return $scope.idleModal = $modal.open({
-          template: "<div class=\"modal-body\">\n  <p><div easypiechart options=\"options\" percent=\"idle_percent\" class=\"text-center\"></p>\n  <p class=\"text-center\">You will be automatically logged out after {{timeout_minutes}} minutes of inactivity</p>\n</div>",
-          controller: function($scope, $modalInstance, idleStart, idleTimeout) {
-            var timeout;
-            $scope.options = {
-              lineWidth: 20,
-              barColor: '#000000',
-              lineCap: 'circle'
-            };
-            timeout = idleStart + idleTimeout;
-            $scope.timeout_minutes = Math.floor(timeout / 60);
-            $scope.idle_percent = 100 - 100 * idleStart / timeout;
-            return $scope.$on('$idleWarn', function(e, countdown) {
-              var idle_time;
-              idle_time = timeout + idleStart - countdown;
-              $scope.idle_percent = 100 - 100 * idle_time / timeout;
-              return $log.info("User has been idle for " + idle_time + " seconds");
-            });
-          }
-        });
-      }
-    });
-    $scope.$on('$idleTimeout', function() {
-      if (AdminLoginService.isLoggedIn()) {
-        $log.info("User session timeout");
-        if ($scope.idleModal) {
-          $scope.idleModal.dismiss();
-        }
-        return $timeout(function() {
-          return $state.go('login');
-        });
-      }
-    });
-    return $scope.$on('$keepalive', function() {
-      if ($scope.idleModal) {
-        return $scope.idleModal.dismiss();
-      }
-    });
-  });
-
-}).call(this);
-
-(function() {
   'use strict';
   angular.module('BBAdmin.Controllers').controller('CalendarCtrl', function($scope, AdminBookingService, $rootScope) {
 
@@ -2868,6 +2695,45 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
             }
           };
         })(this), function(err) {
+          return defer.reject(err);
+        });
+        return defer.promise;
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('BBAdmin.Services').factory('AdminPurchaseService', function($q, halClient, BBModel) {
+    return {
+      query: function(params) {
+        var defer, uri;
+        defer = $q.defer();
+        uri = params.url_root + "/api/v1/admin/purchases/" + params.purchase_id;
+        halClient.$get(uri, params).then(function(purchase) {
+          purchase = new BBModel.Purchase.Total(purchase);
+          return defer.resolve(purchase);
+        }, function(err) {
+          return defer.reject(err);
+        });
+        return defer.promise;
+      },
+      markAsPaid: function(params) {
+        var company_id, defer, uri;
+        defer = $q.defer();
+        if (!params.purchase || !params.url_root) {
+          defer.reject("invalid request");
+          return defer.promise;
+        }
+        if (params.company) {
+          company_id = params.company.id;
+        }
+        uri = params.url_root + ("/api/v1/admin/" + company_id + "/purchases/" + params.purchase.id + "/pay");
+        halClient.$put(uri, params).then(function(purchase) {
+          purchase = new BBModel.Purchase.Total(purchase);
+          return defer.resolve(purchase);
+        }, function(err) {
           return defer.reject(err);
         });
         return defer.promise;
