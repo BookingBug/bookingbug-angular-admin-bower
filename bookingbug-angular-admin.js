@@ -2445,12 +2445,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
   angular.module('BBAdmin.Services').factory('AdminCompanyService', function($q, BBModel, AdminLoginService, $rootScope, $sessionStorage) {
     return {
       query: function(params) {
-        var base, base1, defer;
+        var base, base1, base2, defer;
         defer = $q.defer();
         $rootScope.bb || ($rootScope.bb = {});
-        $rootScope.bb.api_url = $sessionStorage.getItem("host");
-        (base = $rootScope.bb).api_url || (base.api_url = params.apiUrl);
-        (base1 = $rootScope.bb).api_url || (base1.api_url = "http://www.bookingbug.com");
+        (base = $rootScope.bb).api_url || (base.api_url = $sessionStorage.getItem("host"));
+        (base1 = $rootScope.bb).api_url || (base1.api_url = params.apiUrl);
+        (base2 = $rootScope.bb).api_url || (base2.api_url = "http://www.bookingbug.com");
         AdminLoginService.checkLogin(params).then(function() {
           var login_form, options;
           if ($rootScope.user && $rootScope.user.company_id) {
