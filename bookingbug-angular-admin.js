@@ -1995,16 +1995,19 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         data.time = this.start.hour() * 60 + this.start.minute();
         data.duration = this.duration;
         data.id = this.id;
-        data.questions = (function() {
-          var i, len, ref, results;
-          ref = this.questions;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            q = ref[i];
-            results.push(q.getPostData());
-          }
-          return results;
-        }).call(this);
+        data.person_id = this.person_id;
+        if (this.questions) {
+          data.questions = (function() {
+            var i, len, ref, results;
+            ref = this.questions;
+            results = [];
+            for (i = 0, len = ref.length; i < len; i++) {
+              q = ref[i];
+              results.push(q.getPostData());
+            }
+            return results;
+          }).call(this);
+        }
         return data;
       };
 
@@ -2126,6 +2129,26 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 }).call(this);
 
 (function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("Admin.UserModel", function($q, BBModel, BaseModel) {
+    var User;
+    return User = (function(superClass) {
+      extend(User, superClass);
+
+      function User() {
+        return User.__super__.constructor.apply(this, arguments);
+      }
+
+      return User;
+
+    })(BaseModel);
+  });
+
+}).call(this);
+
+(function() {
   angular.module('BBAdmin.Services').factory('AdminBookingService', function($q, $window, halClient, BookingCollections, BBModel, UriTemplate) {
     return {
       query: function(prms) {
@@ -2148,7 +2171,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         if (existing) {
           deferred.resolve(existing);
         } else if (prms.company) {
-          prms.company.$get('bookings').then(function(collection) {
+          prms.company.$get('bookings', prms).then(function(collection) {
             return collection.$get('bookings').then(function(bookings) {
               var b, models;
               models = (function() {
