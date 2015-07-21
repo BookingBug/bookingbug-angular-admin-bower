@@ -2222,6 +2222,9 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       getBooking: function(prms) {
         var deferred, href, uri;
         deferred = $q.defer();
+        if (prms.company && !prms.company_id) {
+          prms.company_id = prms.company.id;
+        }
         href = "/api/v1/admin/{company_id}/bookings/{id}{?embed}";
         uri = new UriTemplate(href).fillFromObject(prms || {});
         halClient.$get(uri, {
@@ -2465,6 +2468,38 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 }).call(this);
 
 (function() {
+  angular.module('BBAdmin.Services').factory('ColorPalette', function() {
+    var colors;
+    colors = [
+      {
+        primary: '#001F3F',
+        secondary: '#80BFFF'
+      }, {
+        primary: '#FF4136',
+        secondary: '#800600'
+      }, {
+        primary: '#7FDBFF',
+        secondary: '#004966'
+      }, {
+        primary: '#3D9970',
+        secondary: '#163728'
+      }
+    ];
+    return {
+      setColors: function(models) {
+        return _.each(models, function(model, i) {
+          var color;
+          color = colors[i % colors.length];
+          model.color = color.primary;
+          return model.textColor = color.secondary;
+        });
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
   angular.module('BBAdmin.Services').factory('AdminCompanyService', function($q, BBModel, AdminLoginService, $rootScope, $sessionStorage) {
     return {
       query: function(params) {
@@ -2473,7 +2508,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         $rootScope.bb || ($rootScope.bb = {});
         (base = $rootScope.bb).api_url || (base.api_url = $sessionStorage.getItem("host"));
         (base1 = $rootScope.bb).api_url || (base1.api_url = params.apiUrl);
-        (base2 = $rootScope.bb).api_url || (base2.api_url = "http://www.bookingbug.com");
+        (base2 = $rootScope.bb).api_url || (base2.api_url = "");
         AdminLoginService.checkLogin(params).then(function() {
           var login_form, options;
           if ($rootScope.user && $rootScope.user.company_id) {
