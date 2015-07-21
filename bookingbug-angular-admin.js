@@ -28,127 +28,923 @@
 }).call(this);
 
 (function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+  'use strict';
+  angular.module('BBAdminMockE2E', ['BBAdmin', 'ngMockE2E']);
 
-  window.Collection.Booking = (function(superClass) {
-    extend(Booking, superClass);
-
-    function Booking() {
-      return Booking.__super__.constructor.apply(this, arguments);
-    }
-
-    Booking.prototype.checkItem = function(item) {
-      return Booking.__super__.checkItem.apply(this, arguments);
-    };
-
-    Booking.prototype.matchesParams = function(item) {
-      if (this.params.start_date != null) {
-        if (this.start_date == null) {
-          this.start_date = moment(this.params.date);
+  angular.module('BBAdminMockE2E').run(function($httpBackend) {
+    var admin_schema, administrators, company, event_chain_schema, event_chains, member_bookings, member_schema, people, person_schema, schedule1, schedule_schema, schedules, service_schema, services;
+    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/login/admin/123').respond(function(method, url, data) {
+      var login;
+      console.log('login post');
+      login = {
+        email: "tennis@example.com",
+        auth_token: "PO_MZmDtEhU1BK6tkMNPjg",
+        company_id: 123,
+        path: "http://www.bookingbug.com/api/v1",
+        role: "owner",
+        _embedded: {
+          members: [],
+          administrators: [
+            {
+              role: "owner",
+              name: "Tom's Tennis",
+              company_id: 123,
+              _links: {
+                self: {
+                  href: "http://www.bookingbug.com/api/v1/admin/123/administrator/29774"
+                },
+                company: {
+                  href: "http://www.bookingbug.com/api/v1/admin/123/company"
+                },
+                login: {
+                  href: "http://www.bookingbug.com/api/v1/login/admin/123"
+                }
+              }
+            }
+          ]
+        },
+        _links: {
+          self: {
+            href: "http://www.bookingbug.com/api/v1/login/123"
+          },
+          administrator: {
+            href: "http://www.bookingbug.com/api/v1/admin/123/administrator/29774",
+            templated: true
+          }
         }
-        if (this.start_date.isAfter(item.start)) {
-          return false;
-        }
-      }
-      if (this.params.end_date != null) {
-        if (this.end_date == null) {
-          this.end_date = moment(this.params.end_date);
-        }
-        if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
-          return false;
-        }
-      }
-      if (!this.params.include_cancelled && item.is_cancelled) {
-        return false;
-      }
-      return true;
-    };
-
-    return Booking;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("BookingCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  window.Collection.Client = (function(superClass) {
-    extend(Client, superClass);
-
-    function Client() {
-      return Client.__super__.constructor.apply(this, arguments);
-    }
-
-    Client.prototype.checkItem = function(item) {
-      return Client.__super__.checkItem.apply(this, arguments);
-    };
-
-    return Client;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("ClientCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  window.Collection.Slot = (function(superClass) {
-    extend(Slot, superClass);
-
-    function Slot() {
-      return Slot.__super__.constructor.apply(this, arguments);
-    }
-
-    Slot.prototype.checkItem = function(item) {
-      return Slot.__super__.checkItem.apply(this, arguments);
-    };
-
-    Slot.prototype.matchesParams = function(item) {
-      if (this.params.start_date) {
-        this.start_date || (this.start_date = moment(this.params.start_date));
-        if (this.start_date.isAfter(item.date)) {
-          return false;
+      };
+      return [200, login, {}];
+    });
+    company = {
+      id: 123,
+      name: "Tom's Tennis",
+      currency_code: 'GBP',
+      country_code: 'gb',
+      timezone: 'Europe/London',
+      _links: {
+        self: {
+          href: 'http://www.bookingbug.com/api/v1/company/123'
+        },
+        people: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/people'
+        },
+        new_person: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/people/new{?signup}',
+          templated: true
+        },
+        administrators: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators'
+        },
+        new_administrator: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/new'
+        },
+        services: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/services'
+        },
+        new_service: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/services/new'
+        },
+        event_chains: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/event_chains'
+        },
+        new_event_chain: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/event_chains/new'
+        },
+        schedules: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/schedules'
+        },
+        new_schedule: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/schedules/new'
+        },
+        resources: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/resources'
+        },
+        new_resource: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/resources/new'
         }
       }
-      if (this.params.end_date) {
-        this.end_date || (this.end_date = moment(this.params.end_date));
-        if (this.end_date.isBefore(item.date)) {
-          return false;
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/company').respond(company);
+    people = {
+      total_entries: 3,
+      _embedded: {
+        people: [
+          {
+            id: 1,
+            name: "John",
+            type: "person",
+            deleted: false,
+            disabled: false,
+            company_id: 123,
+            mobile: "",
+            _links: {
+              self: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/people/1"
+              },
+              items: {
+                href: "http://www.bookingbug.com/api/v1/123/items?person_id=1"
+              },
+              edit: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/people/1/edit"
+              },
+              schedule: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
+              }
+            },
+            _embedded: {}
+          }, {
+            id: 2,
+            name: "Mary",
+            type: "person",
+            email: "mary@example.com",
+            deleted: false,
+            disabled: false,
+            company_id: 123,
+            mobile: "",
+            _links: {
+              self: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/people/2"
+              },
+              items: {
+                href: "http://www.bookingbug.com/api/v1/123/items?person_id=2"
+              },
+              edit: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/people/2/edit"
+              },
+              schedule: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
+              }
+            },
+            _embedded: {}
+          }, {
+            id: 3,
+            name: "Bob",
+            type: "person",
+            email: "bob@example.com",
+            deleted: false,
+            disabled: false,
+            company_id: 123,
+            mobile: "",
+            _links: {
+              self: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/people/3"
+              },
+              items: {
+                href: "http://www.bookingbug.com/api/v1/123/items?person_id=3"
+              },
+              edit: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/people/3/edit"
+              },
+              schedule: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
+              }
+            },
+            _embedded: {}
+          }
+        ]
+      },
+      _links: {
+        self: {
+          href: "http://www.bookingbug.com/api/v1/admin/123/people"
+        },
+        "new": {
+          href: "http://www.bookingbug.com/api/v1/admin/123/people/new{?signup}",
+          templated: true
         }
       }
-      return true;
     };
-
-    return Slot;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("SlotCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/people').respond(people);
+    person_schema = {
+      form: [
+        '*', {
+          type: 'submit',
+          title: 'Save'
+        }
+      ],
+      schema: {
+        properties: {
+          email: {
+            title: 'Email *',
+            type: 'string'
+          },
+          name: {
+            title: 'Name *',
+            type: 'string'
+          },
+          phone: {
+            title: 'Phone',
+            type: 'string'
+          }
+        },
+        required: ['name', 'email'],
+        title: 'Person',
+        type: 'object'
       }
     };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/people/new').respond(function() {
+      return [200, person_schema, {}];
+    });
+    $httpBackend.whenGET(/http:\/\/www.bookingbug.com\/api\/v1\/admin\/123\/people\/\d\/edit/).respond(function() {
+      return [200, person_schema, {}];
+    });
+    $httpBackend.whenDELETE(/http:\/\/www.bookingbug.com\/api\/v1\/admin\/123\/people\/\d/).respond(function() {
+      return [200, {}, {}];
+    });
+    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/admin/123/people').respond(function(method, url, data) {
+      console.log('post person');
+      console.log(method);
+      console.log(url);
+      console.log(data);
+      return [200, people.concat([data]), {}];
+    });
+    services = {
+      total_entries: 3,
+      _embedded: {
+        services: [
+          {
+            id: 1,
+            name: "Data analysis",
+            type: "service",
+            deleted: false,
+            disabled: false,
+            company_id: 123,
+            _links: {
+              self: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/services/1"
+              },
+              edit: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/services/1/edit',
+                templated: true
+              },
+              items: {
+                href: "http://www.bookingbug.com/api/v1/123/items?service_id=1"
+              }
+            },
+            _embedded: {}
+          }, {
+            id: 2,
+            name: "Personal consultation",
+            type: "service",
+            deleted: false,
+            disabled: false,
+            company_id: 123,
+            _links: {
+              self: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/services/2"
+              },
+              edit: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/services/2/edit',
+                templated: true
+              },
+              items: {
+                href: "http://www.bookingbug.com/api/v1/123/items?service_id=2"
+              }
+            },
+            _embedded: {}
+          }, {
+            id: 3,
+            name: "Marketing strategy",
+            type: "service",
+            deleted: false,
+            disabled: false,
+            company_id: 123,
+            _links: {
+              self: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/services/3"
+              },
+              edit: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/services/3/edit',
+                templated: true
+              },
+              items: {
+                href: "http://www.bookingbug.com/api/v1/123/items?service_id=3"
+              }
+            },
+            _embedded: {}
+          }
+        ]
+      },
+      _links: {
+        self: {
+          href: "http://www.bookingbug.com/api/v1/admin/123/services"
+        },
+        "new": {
+          href: "http://www.bookingbug.com/api/v1/admin/123/services/new{?signup}",
+          templated: true
+        }
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services').respond(services);
+    service_schema = {
+      form: [
+        {
+          'key': 'name',
+          type: 'text',
+          feedback: false
+        }, {
+          type: 'submit',
+          title: 'Save'
+        }
+      ],
+      schema: {
+        properties: {
+          name: {
+            title: 'Name *',
+            type: 'String'
+          }
+        },
+        required: ['name'],
+        title: 'Service',
+        type: 'object'
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/new').respond(function() {
+      return [200, service_schema, {}];
+    });
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/1/edit').respond(function() {
+      return [200, service_schema, {}];
+    });
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/2/edit').respond(function() {
+      return [200, service_schema, {}];
+    });
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/3/edit').respond(function() {
+      return [200, service_schema, {}];
+    });
+    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/admin/123/services').respond(function(method, url, data) {
+      console.log('post service');
+      console.log(method);
+      console.log(url);
+      console.log(data);
+      return [200, services.concat([data]), {}];
+    });
+    administrators = {
+      _embedded: {
+        administrators: [
+          {
+            name: "Dave",
+            email: "dave@example.com",
+            role: 'admin',
+            company_id: 123,
+            company_name: "Tom's Tennis",
+            _links: {
+              self: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/1'
+              },
+              edit: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/1/edit'
+              },
+              company: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/company'
+              },
+              login: {
+                href: 'http://www.bookingbug.com/api/v1/login/admin/123'
+              }
+            }
+          }, {
+            name: "Sue",
+            email: "sue@example.com",
+            role: 'owner',
+            company_id: 123,
+            company_name: "Tom's Tennis",
+            _links: {
+              self: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/2'
+              },
+              edit: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/2/edit'
+              },
+              company: {
+                href: 'http://www.bookingbug.com/api/v1/admin/123/company'
+              },
+              login: {
+                href: 'http://www.bookingbug.com/api/v1/login/admin/123'
+              }
+            }
+          }
+        ]
+      },
+      _links: {
+        self: {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators'
+        },
+        "new": {
+          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/new',
+          templated: true
+        }
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators').respond(administrators);
+    admin_schema = {
+      form: [
+        {
+          key: 'name',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'email',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'role',
+          type: 'select',
+          feedback: false,
+          titleMap: {
+            owner: 'Owner',
+            admin: 'Admin',
+            user: 'User'
+          }
+        }, {
+          type: 'submit',
+          title: 'Save'
+        }
+      ],
+      schema: {
+        properties: {
+          name: {
+            title: 'Name *',
+            type: 'string'
+          },
+          email: {
+            title: 'Email *',
+            type: 'string'
+          },
+          role: {
+            title: 'Role',
+            type: 'string',
+            "enum": ['owner', 'admin', 'user', 'callcenter']
+          }
+        },
+        required: ['name', 'email'],
+        title: 'Administrator',
+        type: 'object'
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators/new').respond(function() {
+      return [200, admin_schema, {}];
+    });
+    admin_schema = {
+      form: [
+        {
+          key: 'name',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'role',
+          type: 'select',
+          feedback: false,
+          titleMap: {
+            owner: 'Owner',
+            admin: 'Admin',
+            user: 'User'
+          }
+        }, {
+          type: 'submit',
+          title: 'Save'
+        }
+      ],
+      schema: {
+        properties: {
+          name: {
+            title: 'Name *',
+            type: 'string'
+          },
+          role: {
+            title: 'Role',
+            type: 'string',
+            "enum": ['owner', 'admin', 'user', 'callcenter']
+          }
+        },
+        title: 'Administrator',
+        type: 'object'
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators/1/edit').respond(function() {
+      return [200, admin_schema, {}];
+    });
+    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/login/member/123').respond(function(method, url, data) {
+      var login;
+      login = {
+        email: "smith@example.com",
+        auth_token: "TO_4ZrDtEhU1BK6tkMNPj0",
+        company_id: 123,
+        path: "http://www.bookingbug.com/api/v1",
+        role: "member",
+        _embedded: {
+          members: [
+            {
+              first_name: "John",
+              last_name: "Smith",
+              email: "smith@example.com",
+              client_type: "Member",
+              address1: "Some street",
+              address3: "Some town",
+              id: 123456,
+              company_id: 123,
+              _links: {
+                self: {
+                  href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
+                  templated: true
+                },
+                bookings: {
+                  href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings{?start_date,end_date,include_cancelled,page,per_page}",
+                  templated: true
+                },
+                company: {
+                  href: "http://www.bookingbug.com/api/v1/company/123",
+                  templated: true
+                },
+                edit_member: {
+                  href: "http://www.bookingbug.com/api/v1/123/members/123456/edit",
+                  templated: true
+                },
+                pre_paid_bookings: {
+                  href: "http://www.bookingbug.com/api/v1/123/members/123456/pre_paid_bookings{?start_date,end_date,page,per_page}",
+                  templated: true
+                }
+              }
+            }
+          ],
+          administrators: []
+        },
+        _links: {
+          self: {
+            href: "http://www.bookingbug.com/api/v1/login/123"
+          },
+          member: {
+            href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
+            templated: true
+          }
+        }
+      };
+      return [200, login, {}];
+    });
+    member_schema = {
+      form: [
+        {
+          key: 'first_name',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'last_name',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'email',
+          type: 'email',
+          feedback: false
+        }, {
+          key: 'address1',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'address2',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'address3',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'address4',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'postcode',
+          type: 'text',
+          feedback: false
+        }, {
+          type: 'submit',
+          title: 'Save'
+        }
+      ],
+      schema: {
+        properties: {
+          first_name: {
+            title: 'First Name',
+            type: 'string'
+          },
+          last_name: {
+            title: 'Last Name',
+            type: 'string'
+          },
+          email: {
+            title: 'Email',
+            type: 'string'
+          },
+          address1: {
+            title: 'Address',
+            type: 'string'
+          },
+          address2: {
+            title: ' ',
+            type: 'string'
+          },
+          address3: {
+            title: 'Town',
+            type: 'string'
+          },
+          address4: {
+            title: 'County',
+            type: 'string'
+          },
+          postcode: {
+            title: 'Post Code',
+            type: 'string'
+          }
+        },
+        title: 'Member',
+        type: 'object'
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/123/members/123456/edit').respond(function() {
+      return [200, member_schema, {}];
+    });
+    member_bookings = {
+      _embedded: {
+        bookings: [
+          {
+            _embedded: {
+              answers: [
+                {
+                  admin_only: false,
+                  company_id: 123,
+                  id: 6700607,
+                  outcome: false,
+                  price: 0,
+                  question_id: 20478,
+                  question_text: "Gender",
+                  value: "M"
+                }
+              ]
+            },
+            _links: {
+              company: {
+                href: "http://www.bookingbug.com/api/v1/company/123"
+              },
+              edit_booking: {
+                href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings/4553463/edit"
+              },
+              member: {
+                href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
+                templated: true
+              },
+              person: {
+                href: "http://www.bookingbug.com/api/v1/123/people/74",
+                templated: true
+              },
+              self: {
+                href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=2014-11-21&page=1&per_page=30"
+              },
+              service: {
+                href: "http://www.bookingbug.com/api/v1/123/services/30063",
+                templated: true
+              }
+            },
+            attended: true,
+            category_name: "Private Lessons",
+            company_id: 123,
+            datetime: "2014-11-21T12:00:00+00:00",
+            describe: "Fri 21st Nov 12:00pm",
+            duration: 3600,
+            end_datetime: "2014-11-21T13:00:00+00:00",
+            event_id: 325562,
+            full_describe: "Tennis Lesson",
+            id: 4553463,
+            min_cancellation_time: "2014-11-20T12:00:00+00:00",
+            on_waitlist: false,
+            paid: 0,
+            person_name: "Bob",
+            price: 1,
+            purchase_id: 3844035,
+            purchase_ref: "j7PuYsmbexmFXS12Mzg0NDAzNQ%3D%3D",
+            quantity: 1,
+            service_name: "Tennis Lesson",
+            time_zone: ""
+          }
+        ]
+      },
+      _links: {
+        self: {
+          href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=2014-11-21&page=1&per_page=30"
+        }
+      },
+      total_entries: 1
+    };
+    $httpBackend.whenGET("http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=" + (moment().format("YYYY-MM-DD"))).respond(function() {
+      return [200, member_bookings, {}];
+    });
+    event_chains = {
+      total_entries: 1,
+      _embedded: {
+        event_chains: [
+          {
+            id: 1,
+            deleted: false,
+            disabled: false,
+            company_id: 123,
+            capacity_view: 3,
+            description: "",
+            duration: 120,
+            email_per_ticket: true,
+            end_date: "2015-11-12",
+            group: "Events",
+            long_description: "",
+            max_num_bookings: 1,
+            min_advance_time: "2015-02-13T14:24:29+00:00",
+            name: "My Event",
+            person_name: "Ed",
+            price: 0,
+            questions_per_ticket: false,
+            spaces: 10,
+            start_date: "2015-11-12",
+            ticket_type: "single_space",
+            time: "12:00:00+00:00",
+            mobile: "",
+            _links: {
+              self: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/1"
+              },
+              edit: {
+                href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/1/edit"
+              }
+            },
+            _embedded: {}
+          }
+        ]
+      },
+      _links: {
+        self: {
+          href: "http://www.bookingbug.com/api/v1/admin/123/event_chains"
+        },
+        "new": {
+          href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/new",
+          templated: true
+        }
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains').respond(event_chains);
+    event_chain_schema = {
+      form: [
+        {
+          key: 'name',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'description',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'spaces',
+          type: 'number',
+          feedback: false
+        }, {
+          key: 'events',
+          feedback: false,
+          add: 'New Event',
+          style: {
+            add: 'btn-success'
+          },
+          items: [
+            {
+              key: 'events[].date',
+              type: 'date',
+              feedback: false
+            }, {
+              key: 'events[].time',
+              type: 'time',
+              feedback: false
+            }, {
+              key: 'events[].duration',
+              type: 'number',
+              feedback: false
+            }
+          ]
+        }, {
+          type: 'submit',
+          title: 'Save'
+        }
+      ],
+      schema: {
+        properties: {
+          name: {
+            title: 'Name *',
+            type: 'string'
+          },
+          description: {
+            title: 'Description',
+            type: 'string'
+          },
+          events: {
+            title: 'Events',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                date: {
+                  format: 'date',
+                  title: 'Date',
+                  type: 'string'
+                },
+                duration: {
+                  title: 'Duration',
+                  type: 'number'
+                },
+                time: {
+                  format: 'time',
+                  title: 'Time',
+                  type: 'string'
+                }
+              }
+            }
+          },
+          spaces: {
+            title: 'Spaces *',
+            type: 'string'
+          }
+        },
+        required: ['name', 'spaces'],
+        title: 'Event Chain',
+        type: 'object'
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains/new').respond(function() {
+      return [200, event_chain_schema, {}];
+    });
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains/1/edit').respond(function() {
+      return [200, event_chain_schema, {}];
+    });
+    schedule1 = {
+      id: 1,
+      name: "Schedule1",
+      company_id: 123,
+      rules: {
+        '1': "0700-1500",
+        '2': "0700-1600,1800-1900",
+        '2015-02-01': "0600-1200"
+      },
+      _links: {
+        self: {
+          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
+        },
+        edit: {
+          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/edit"
+        }
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/1').respond(schedule1);
+    schedules = {
+      total_entries: 1,
+      _embedded: {
+        schedules: [schedule1]
+      },
+      _links: {
+        self: {
+          href: "http://www.bookingbug.com/api/v1/admin/123/schedules"
+        },
+        "new": {
+          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/new",
+          templated: true
+        }
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules').respond(schedules);
+    schedule_schema = {
+      form: [
+        {
+          key: 'name',
+          type: 'text',
+          feedback: false
+        }, {
+          key: 'rules',
+          type: 'schedule',
+          feedback: false
+        }, {
+          type: 'submit',
+          title: 'Save'
+        }
+      ],
+      schema: {
+        properties: {
+          name: {
+            title: 'Name *',
+            type: 'string'
+          },
+          rules: {
+            title: 'Rules *',
+            type: 'string'
+          }
+        },
+        required: ['name', 'rules'],
+        title: 'Schema',
+        type: 'object'
+      }
+    };
+    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/new').respond(function() {
+      return [200, schedule_schema, {}];
+    });
+    return $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/edit').respond(function() {
+      return [200, schedule_schema, {}];
+    });
   });
 
 }).call(this);
@@ -842,6 +1638,132 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
         });
       }
       return $scope.ok();
+    };
+  });
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Booking = (function(superClass) {
+    extend(Booking, superClass);
+
+    function Booking() {
+      return Booking.__super__.constructor.apply(this, arguments);
+    }
+
+    Booking.prototype.checkItem = function(item) {
+      return Booking.__super__.checkItem.apply(this, arguments);
+    };
+
+    Booking.prototype.matchesParams = function(item) {
+      if (this.params.start_date != null) {
+        if (this.start_date == null) {
+          this.start_date = moment(this.params.date);
+        }
+        if (this.start_date.isAfter(item.start)) {
+          return false;
+        }
+      }
+      if (this.params.end_date != null) {
+        if (this.end_date == null) {
+          this.end_date = moment(this.params.end_date);
+        }
+        if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
+          return false;
+        }
+      }
+      if (!this.params.include_cancelled && item.is_cancelled) {
+        return false;
+      }
+      return true;
+    };
+
+    return Booking;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("BookingCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Client = (function(superClass) {
+    extend(Client, superClass);
+
+    function Client() {
+      return Client.__super__.constructor.apply(this, arguments);
+    }
+
+    Client.prototype.checkItem = function(item) {
+      return Client.__super__.checkItem.apply(this, arguments);
+    };
+
+    return Client;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("ClientCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Slot = (function(superClass) {
+    extend(Slot, superClass);
+
+    function Slot() {
+      return Slot.__super__.constructor.apply(this, arguments);
+    }
+
+    Slot.prototype.checkItem = function(item) {
+      return Slot.__super__.checkItem.apply(this, arguments);
+    };
+
+    Slot.prototype.matchesParams = function(item) {
+      if (this.params.start_date) {
+        this.start_date || (this.start_date = moment(this.params.start_date));
+        if (this.start_date.isAfter(item.date)) {
+          return false;
+        }
+      }
+      if (this.params.end_date) {
+        this.end_date || (this.end_date = moment(this.params.end_date));
+        if (this.end_date.isBefore(item.date)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    return Slot;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("SlotCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
     };
   });
 
@@ -2046,928 +2968,6 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return deferred.promise;
       }
     };
-  });
-
-}).call(this);
-
-(function() {
-  'use strict';
-  angular.module('BBAdminMockE2E', ['BBAdmin', 'ngMockE2E']);
-
-  angular.module('BBAdminMockE2E').run(function($httpBackend) {
-    var admin_schema, administrators, company, event_chain_schema, event_chains, member_bookings, member_schema, people, person_schema, schedule1, schedule_schema, schedules, service_schema, services;
-    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/login/admin/123').respond(function(method, url, data) {
-      var login;
-      console.log('login post');
-      login = {
-        email: "tennis@example.com",
-        auth_token: "PO_MZmDtEhU1BK6tkMNPjg",
-        company_id: 123,
-        path: "http://www.bookingbug.com/api/v1",
-        role: "owner",
-        _embedded: {
-          members: [],
-          administrators: [
-            {
-              role: "owner",
-              name: "Tom's Tennis",
-              company_id: 123,
-              _links: {
-                self: {
-                  href: "http://www.bookingbug.com/api/v1/admin/123/administrator/29774"
-                },
-                company: {
-                  href: "http://www.bookingbug.com/api/v1/admin/123/company"
-                },
-                login: {
-                  href: "http://www.bookingbug.com/api/v1/login/admin/123"
-                }
-              }
-            }
-          ]
-        },
-        _links: {
-          self: {
-            href: "http://www.bookingbug.com/api/v1/login/123"
-          },
-          administrator: {
-            href: "http://www.bookingbug.com/api/v1/admin/123/administrator/29774",
-            templated: true
-          }
-        }
-      };
-      return [200, login, {}];
-    });
-    company = {
-      id: 123,
-      name: "Tom's Tennis",
-      currency_code: 'GBP',
-      country_code: 'gb',
-      timezone: 'Europe/London',
-      _links: {
-        self: {
-          href: 'http://www.bookingbug.com/api/v1/company/123'
-        },
-        people: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/people'
-        },
-        new_person: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/people/new{?signup}',
-          templated: true
-        },
-        administrators: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators'
-        },
-        new_administrator: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/new'
-        },
-        services: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/services'
-        },
-        new_service: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/services/new'
-        },
-        event_chains: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/event_chains'
-        },
-        new_event_chain: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/event_chains/new'
-        },
-        schedules: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/schedules'
-        },
-        new_schedule: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/schedules/new'
-        },
-        resources: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/resources'
-        },
-        new_resource: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/resources/new'
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/company').respond(company);
-    people = {
-      total_entries: 3,
-      _embedded: {
-        people: [
-          {
-            id: 1,
-            name: "John",
-            type: "person",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            mobile: "",
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/1"
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?person_id=1"
-              },
-              edit: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/1/edit"
-              },
-              schedule: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
-              }
-            },
-            _embedded: {}
-          }, {
-            id: 2,
-            name: "Mary",
-            type: "person",
-            email: "mary@example.com",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            mobile: "",
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/2"
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?person_id=2"
-              },
-              edit: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/2/edit"
-              },
-              schedule: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
-              }
-            },
-            _embedded: {}
-          }, {
-            id: 3,
-            name: "Bob",
-            type: "person",
-            email: "bob@example.com",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            mobile: "",
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/3"
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?person_id=3"
-              },
-              edit: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/3/edit"
-              },
-              schedule: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
-              }
-            },
-            _embedded: {}
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/people"
-        },
-        "new": {
-          href: "http://www.bookingbug.com/api/v1/admin/123/people/new{?signup}",
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/people').respond(people);
-    person_schema = {
-      form: [
-        '*', {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          email: {
-            title: 'Email *',
-            type: 'string'
-          },
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          phone: {
-            title: 'Phone',
-            type: 'string'
-          }
-        },
-        required: ['name', 'email'],
-        title: 'Person',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/people/new').respond(function() {
-      return [200, person_schema, {}];
-    });
-    $httpBackend.whenGET(/http:\/\/www.bookingbug.com\/api\/v1\/admin\/123\/people\/\d\/edit/).respond(function() {
-      return [200, person_schema, {}];
-    });
-    $httpBackend.whenDELETE(/http:\/\/www.bookingbug.com\/api\/v1\/admin\/123\/people\/\d/).respond(function() {
-      return [200, {}, {}];
-    });
-    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/admin/123/people').respond(function(method, url, data) {
-      console.log('post person');
-      console.log(method);
-      console.log(url);
-      console.log(data);
-      return [200, people.concat([data]), {}];
-    });
-    services = {
-      total_entries: 3,
-      _embedded: {
-        services: [
-          {
-            id: 1,
-            name: "Data analysis",
-            type: "service",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/services/1"
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/services/1/edit',
-                templated: true
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?service_id=1"
-              }
-            },
-            _embedded: {}
-          }, {
-            id: 2,
-            name: "Personal consultation",
-            type: "service",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/services/2"
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/services/2/edit',
-                templated: true
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?service_id=2"
-              }
-            },
-            _embedded: {}
-          }, {
-            id: 3,
-            name: "Marketing strategy",
-            type: "service",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/services/3"
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/services/3/edit',
-                templated: true
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?service_id=3"
-              }
-            },
-            _embedded: {}
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/services"
-        },
-        "new": {
-          href: "http://www.bookingbug.com/api/v1/admin/123/services/new{?signup}",
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services').respond(services);
-    service_schema = {
-      form: [
-        {
-          'key': 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'String'
-          }
-        },
-        required: ['name'],
-        title: 'Service',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/new').respond(function() {
-      return [200, service_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/1/edit').respond(function() {
-      return [200, service_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/2/edit').respond(function() {
-      return [200, service_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/3/edit').respond(function() {
-      return [200, service_schema, {}];
-    });
-    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/admin/123/services').respond(function(method, url, data) {
-      console.log('post service');
-      console.log(method);
-      console.log(url);
-      console.log(data);
-      return [200, services.concat([data]), {}];
-    });
-    administrators = {
-      _embedded: {
-        administrators: [
-          {
-            name: "Dave",
-            email: "dave@example.com",
-            role: 'admin',
-            company_id: 123,
-            company_name: "Tom's Tennis",
-            _links: {
-              self: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/1'
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/1/edit'
-              },
-              company: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/company'
-              },
-              login: {
-                href: 'http://www.bookingbug.com/api/v1/login/admin/123'
-              }
-            }
-          }, {
-            name: "Sue",
-            email: "sue@example.com",
-            role: 'owner',
-            company_id: 123,
-            company_name: "Tom's Tennis",
-            _links: {
-              self: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/2'
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/2/edit'
-              },
-              company: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/company'
-              },
-              login: {
-                href: 'http://www.bookingbug.com/api/v1/login/admin/123'
-              }
-            }
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators'
-        },
-        "new": {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/new',
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators').respond(administrators);
-    admin_schema = {
-      form: [
-        {
-          key: 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'email',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'role',
-          type: 'select',
-          feedback: false,
-          titleMap: {
-            owner: 'Owner',
-            admin: 'Admin',
-            user: 'User'
-          }
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          email: {
-            title: 'Email *',
-            type: 'string'
-          },
-          role: {
-            title: 'Role',
-            type: 'string',
-            "enum": ['owner', 'admin', 'user', 'callcenter']
-          }
-        },
-        required: ['name', 'email'],
-        title: 'Administrator',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators/new').respond(function() {
-      return [200, admin_schema, {}];
-    });
-    admin_schema = {
-      form: [
-        {
-          key: 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'role',
-          type: 'select',
-          feedback: false,
-          titleMap: {
-            owner: 'Owner',
-            admin: 'Admin',
-            user: 'User'
-          }
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          role: {
-            title: 'Role',
-            type: 'string',
-            "enum": ['owner', 'admin', 'user', 'callcenter']
-          }
-        },
-        title: 'Administrator',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators/1/edit').respond(function() {
-      return [200, admin_schema, {}];
-    });
-    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/login/member/123').respond(function(method, url, data) {
-      var login;
-      login = {
-        email: "smith@example.com",
-        auth_token: "TO_4ZrDtEhU1BK6tkMNPj0",
-        company_id: 123,
-        path: "http://www.bookingbug.com/api/v1",
-        role: "member",
-        _embedded: {
-          members: [
-            {
-              first_name: "John",
-              last_name: "Smith",
-              email: "smith@example.com",
-              client_type: "Member",
-              address1: "Some street",
-              address3: "Some town",
-              id: 123456,
-              company_id: 123,
-              _links: {
-                self: {
-                  href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
-                  templated: true
-                },
-                bookings: {
-                  href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings{?start_date,end_date,include_cancelled,page,per_page}",
-                  templated: true
-                },
-                company: {
-                  href: "http://www.bookingbug.com/api/v1/company/123",
-                  templated: true
-                },
-                edit_member: {
-                  href: "http://www.bookingbug.com/api/v1/123/members/123456/edit",
-                  templated: true
-                },
-                pre_paid_bookings: {
-                  href: "http://www.bookingbug.com/api/v1/123/members/123456/pre_paid_bookings{?start_date,end_date,page,per_page}",
-                  templated: true
-                }
-              }
-            }
-          ],
-          administrators: []
-        },
-        _links: {
-          self: {
-            href: "http://www.bookingbug.com/api/v1/login/123"
-          },
-          member: {
-            href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
-            templated: true
-          }
-        }
-      };
-      return [200, login, {}];
-    });
-    member_schema = {
-      form: [
-        {
-          key: 'first_name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'last_name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'email',
-          type: 'email',
-          feedback: false
-        }, {
-          key: 'address1',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'address2',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'address3',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'address4',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'postcode',
-          type: 'text',
-          feedback: false
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          first_name: {
-            title: 'First Name',
-            type: 'string'
-          },
-          last_name: {
-            title: 'Last Name',
-            type: 'string'
-          },
-          email: {
-            title: 'Email',
-            type: 'string'
-          },
-          address1: {
-            title: 'Address',
-            type: 'string'
-          },
-          address2: {
-            title: ' ',
-            type: 'string'
-          },
-          address3: {
-            title: 'Town',
-            type: 'string'
-          },
-          address4: {
-            title: 'County',
-            type: 'string'
-          },
-          postcode: {
-            title: 'Post Code',
-            type: 'string'
-          }
-        },
-        title: 'Member',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/123/members/123456/edit').respond(function() {
-      return [200, member_schema, {}];
-    });
-    member_bookings = {
-      _embedded: {
-        bookings: [
-          {
-            _embedded: {
-              answers: [
-                {
-                  admin_only: false,
-                  company_id: 123,
-                  id: 6700607,
-                  outcome: false,
-                  price: 0,
-                  question_id: 20478,
-                  question_text: "Gender",
-                  value: "M"
-                }
-              ]
-            },
-            _links: {
-              company: {
-                href: "http://www.bookingbug.com/api/v1/company/123"
-              },
-              edit_booking: {
-                href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings/4553463/edit"
-              },
-              member: {
-                href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
-                templated: true
-              },
-              person: {
-                href: "http://www.bookingbug.com/api/v1/123/people/74",
-                templated: true
-              },
-              self: {
-                href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=2014-11-21&page=1&per_page=30"
-              },
-              service: {
-                href: "http://www.bookingbug.com/api/v1/123/services/30063",
-                templated: true
-              }
-            },
-            attended: true,
-            category_name: "Private Lessons",
-            company_id: 123,
-            datetime: "2014-11-21T12:00:00+00:00",
-            describe: "Fri 21st Nov 12:00pm",
-            duration: 3600,
-            end_datetime: "2014-11-21T13:00:00+00:00",
-            event_id: 325562,
-            full_describe: "Tennis Lesson",
-            id: 4553463,
-            min_cancellation_time: "2014-11-20T12:00:00+00:00",
-            on_waitlist: false,
-            paid: 0,
-            person_name: "Bob",
-            price: 1,
-            purchase_id: 3844035,
-            purchase_ref: "j7PuYsmbexmFXS12Mzg0NDAzNQ%3D%3D",
-            quantity: 1,
-            service_name: "Tennis Lesson",
-            time_zone: ""
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=2014-11-21&page=1&per_page=30"
-        }
-      },
-      total_entries: 1
-    };
-    $httpBackend.whenGET("http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=" + (moment().format("YYYY-MM-DD"))).respond(function() {
-      return [200, member_bookings, {}];
-    });
-    event_chains = {
-      total_entries: 1,
-      _embedded: {
-        event_chains: [
-          {
-            id: 1,
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            capacity_view: 3,
-            description: "",
-            duration: 120,
-            email_per_ticket: true,
-            end_date: "2015-11-12",
-            group: "Events",
-            long_description: "",
-            max_num_bookings: 1,
-            min_advance_time: "2015-02-13T14:24:29+00:00",
-            name: "My Event",
-            person_name: "Ed",
-            price: 0,
-            questions_per_ticket: false,
-            spaces: 10,
-            start_date: "2015-11-12",
-            ticket_type: "single_space",
-            time: "12:00:00+00:00",
-            mobile: "",
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/1"
-              },
-              edit: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/1/edit"
-              }
-            },
-            _embedded: {}
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/event_chains"
-        },
-        "new": {
-          href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/new",
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains').respond(event_chains);
-    event_chain_schema = {
-      form: [
-        {
-          key: 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'description',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'spaces',
-          type: 'number',
-          feedback: false
-        }, {
-          key: 'events',
-          feedback: false,
-          add: 'New Event',
-          style: {
-            add: 'btn-success'
-          },
-          items: [
-            {
-              key: 'events[].date',
-              type: 'date',
-              feedback: false
-            }, {
-              key: 'events[].time',
-              type: 'time',
-              feedback: false
-            }, {
-              key: 'events[].duration',
-              type: 'number',
-              feedback: false
-            }
-          ]
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          description: {
-            title: 'Description',
-            type: 'string'
-          },
-          events: {
-            title: 'Events',
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                date: {
-                  format: 'date',
-                  title: 'Date',
-                  type: 'string'
-                },
-                duration: {
-                  title: 'Duration',
-                  type: 'number'
-                },
-                time: {
-                  format: 'time',
-                  title: 'Time',
-                  type: 'string'
-                }
-              }
-            }
-          },
-          spaces: {
-            title: 'Spaces *',
-            type: 'string'
-          }
-        },
-        required: ['name', 'spaces'],
-        title: 'Event Chain',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains/new').respond(function() {
-      return [200, event_chain_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains/1/edit').respond(function() {
-      return [200, event_chain_schema, {}];
-    });
-    schedule1 = {
-      id: 1,
-      name: "Schedule1",
-      company_id: 123,
-      rules: {
-        '1': "0700-1500",
-        '2': "0700-1600,1800-1900",
-        '2015-02-01': "0600-1200"
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
-        },
-        edit: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/edit"
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/1').respond(schedule1);
-    schedules = {
-      total_entries: 1,
-      _embedded: {
-        schedules: [schedule1]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/schedules"
-        },
-        "new": {
-          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/new",
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules').respond(schedules);
-    schedule_schema = {
-      form: [
-        {
-          key: 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'rules',
-          type: 'schedule',
-          feedback: false
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          rules: {
-            title: 'Rules *',
-            type: 'string'
-          }
-        },
-        required: ['name', 'rules'],
-        title: 'Schema',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/new').respond(function() {
-      return [200, schedule_schema, {}];
-    });
-    return $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/edit').respond(function() {
-      return [200, schedule_schema, {}];
-    });
   });
 
 }).call(this);
