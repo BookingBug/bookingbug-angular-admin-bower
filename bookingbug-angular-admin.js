@@ -1995,16 +1995,19 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         data.time = this.start.hour() * 60 + this.start.minute();
         data.duration = this.duration;
         data.id = this.id;
-        data.questions = (function() {
-          var i, len, ref, results;
-          ref = this.questions;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            q = ref[i];
-            results.push(q.getPostData());
-          }
-          return results;
-        }).call(this);
+        data.person_id = this.person_id;
+        if (this.questions) {
+          data.questions = (function() {
+            var i, len, ref, results;
+            ref = this.questions;
+            results = [];
+            for (i = 0, len = ref.length; i < len; i++) {
+              q = ref[i];
+              results.push(q.getPostData());
+            }
+            return results;
+          }).call(this);
+        }
         return data;
       };
 
@@ -2126,6 +2129,26 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 }).call(this);
 
 (function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("Admin.UserModel", function($q, BBModel, BaseModel) {
+    var User;
+    return User = (function(superClass) {
+      extend(User, superClass);
+
+      function User() {
+        return User.__super__.constructor.apply(this, arguments);
+      }
+
+      return User;
+
+    })(BaseModel);
+  });
+
+}).call(this);
+
+(function() {
   angular.module('BBAdmin.Services').factory('AdminBookingService', function($q, $window, halClient, BookingCollections, BBModel, UriTemplate) {
     return {
       query: function(prms) {
@@ -2148,7 +2171,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         if (existing) {
           deferred.resolve(existing);
         } else if (prms.company) {
-          prms.company.$get('bookings').then(function(collection) {
+          prms.company.$get('bookings', prms).then(function(collection) {
             return collection.$get('bookings').then(function(bookings) {
               var b, models;
               models = (function() {
@@ -2199,6 +2222,9 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       getBooking: function(prms) {
         var deferred, href, uri;
         deferred = $q.defer();
+        if (prms.company && !prms.company_id) {
+          prms.company_id = prms.company.id;
+        }
         href = "/api/v1/admin/{company_id}/bookings/{id}{?embed}";
         uri = new UriTemplate(href).fillFromObject(prms || {});
         halClient.$get(uri, {
@@ -2442,6 +2468,38 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 }).call(this);
 
 (function() {
+  angular.module('BBAdmin.Services').factory('ColorPalette', function() {
+    var colors;
+    colors = [
+      {
+        primary: '#001F3F',
+        secondary: '#80BFFF'
+      }, {
+        primary: '#FF4136',
+        secondary: '#800600'
+      }, {
+        primary: '#7FDBFF',
+        secondary: '#004966'
+      }, {
+        primary: '#3D9970',
+        secondary: '#163728'
+      }
+    ];
+    return {
+      setColors: function(models) {
+        return _.each(models, function(model, i) {
+          var color;
+          color = colors[i % colors.length];
+          model.color = color.primary;
+          return model.textColor = color.secondary;
+        });
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
   angular.module('BBAdmin.Services').factory('AdminCompanyService', function($q, BBModel, AdminLoginService, $rootScope, $sessionStorage) {
     return {
       query: function(params) {
@@ -2450,7 +2508,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         $rootScope.bb || ($rootScope.bb = {});
         (base = $rootScope.bb).api_url || (base.api_url = $sessionStorage.getItem("host"));
         (base1 = $rootScope.bb).api_url || (base1.api_url = params.apiUrl);
-        (base2 = $rootScope.bb).api_url || (base2.api_url = "http://www.bookingbug.com");
+        (base2 = $rootScope.bb).api_url || (base2.api_url = "");
         AdminLoginService.checkLogin(params).then(function() {
           var login_form, options;
           if ($rootScope.user && $rootScope.user.company_id) {
