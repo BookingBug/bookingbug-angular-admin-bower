@@ -2483,6 +2483,15 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       }, {
         primary: '#3D9970',
         secondary: '#163728'
+      }, {
+        primary: '#85144B',
+        secondary: '#EB7AB1'
+      }, {
+        primary: '#2ECC40',
+        secondary: '#0E3E14'
+      }, {
+        primary: '#FF851B',
+        secondary: '#663000'
       }
     ];
     return {
