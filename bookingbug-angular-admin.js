@@ -950,11 +950,11 @@
 }).call(this);
 
 (function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+  var __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __hasProp = {}.hasOwnProperty;
 
-  window.Collection.Booking = (function(superClass) {
-    extend(Booking, superClass);
+  window.Collection.Booking = (function(_super) {
+    __extends(Booking, _super);
 
     function Booking() {
       return Booking.__super__.constructor.apply(this, arguments);
@@ -1002,11 +1002,11 @@
 }).call(this);
 
 (function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+  var __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __hasProp = {}.hasOwnProperty;
 
-  window.Collection.Client = (function(superClass) {
-    extend(Client, superClass);
+  window.Collection.Client = (function(_super) {
+    __extends(Client, _super);
 
     function Client() {
       return Client.__super__.constructor.apply(this, arguments);
@@ -1031,11 +1031,11 @@
 }).call(this);
 
 (function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+  var __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __hasProp = {}.hasOwnProperty;
 
-  window.Collection.Slot = (function(superClass) {
-    extend(Slot, superClass);
+  window.Collection.Slot = (function(_super) {
+    __extends(Slot, _super);
 
     function Slot() {
       return Slot.__super__.constructor.apply(this, arguments);
@@ -1292,7 +1292,7 @@
     $scope.selectedCategory = null;
     $rootScope.connection_started.then((function(_this) {
       return function() {
-        var d, date, end, results;
+        var d, date, end, _results;
         date = moment();
         $scope.current_date = date;
         $scope.companies = $scope.bb.company.companies;
@@ -1303,30 +1303,30 @@
         end = moment(date).add(21, 'days');
         $scope.end_date = end;
         d = moment(date);
-        results = [];
+        _results = [];
         while (d.isBefore(end)) {
           $scope.dates.push(d.clone());
-          results.push(d.add(1, 'days'));
+          _results.push(d.add(1, 'days'));
         }
-        return results;
+        return _results;
       };
     })(this));
     $scope.selectCompany = function(item) {
       return window.location = "/view/dashboard/pick_company/" + item.id;
     };
     $scope.advance_date = function(num) {
-      var d, date, results;
+      var d, date, _results;
       date = $scope.current_date.add(num, 'days');
       $scope.end_date = moment(date).add(21, 'days');
       $scope.current_date = moment(date);
       $scope.dates = [];
       d = date.clone();
-      results = [];
+      _results = [];
       while (d.isBefore($scope.end_date)) {
         $scope.dates.push(d.clone());
-        results.push(d.add(1, 'days'));
+        _results.push(d.add(1, 'days'));
       }
-      return results;
+      return _results;
     };
     return $scope.$on("Refresh_Comp", function(event, message) {
       return $scope.$apply();
@@ -1480,21 +1480,21 @@
     })(this));
     $scope.update_days = (function(_this) {
       return function() {
-        var day, i, len, ref, results;
+        var day, _i, _len, _ref, _results;
         $scope.dayList = [];
         $scope.service_id = null;
-        ref = $scope.sdays;
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          day = ref[i];
+        _ref = $scope.sdays;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          day = _ref[_i];
           if (day.category_id === $scope.category.id) {
             $scope.dayList.push(day);
-            results.push($scope.service_id = day.id);
+            _results.push($scope.service_id = day.id);
           } else {
-            results.push(void 0);
+            _results.push(void 0);
           }
         }
-        return results;
+        return _results;
       };
     })(this);
     return $rootScope.$watch('category', (function(_this) {
@@ -1638,11 +1638,11 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
         prms.url = $scope.bb.api_url;
         $scope.aslots = AdminTimeService.query(prms);
         return $scope.aslots.then(function(res) {
-          var i, k, len, slot, slots, x, xres;
+          var k, slot, slots, x, xres, _i, _len;
           $scope.loaded = true;
           slots = {};
-          for (i = 0, len = res.length; i < len; i++) {
-            x = res[i];
+          for (_i = 0, _len = res.length; _i < _len; _i++) {
+            x = res[_i];
             if (!slots[x.time]) {
               slots[x.time] = x;
             }
@@ -1843,35 +1843,35 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       controller: function($scope, $rootScope, PersonService, $q, BBModel, PersonModel) {
         $rootScope.connection_started.then(function() {
           return $scope.bb.company.getPeoplePromise().then(function(people) {
-            var i, len, person, results;
+            var person, _i, _len, _results;
             $scope.people = people;
-            results = [];
-            for (i = 0, len = people.length; i < len; i++) {
-              person = people[i];
-              results.push(person.show = true);
+            _results = [];
+            for (_i = 0, _len = people.length; _i < _len; _i++) {
+              person = people[_i];
+              _results.push(person.show = true);
             }
-            return results;
+            return _results;
           });
         });
         $scope.show_all_people = function() {
-          var i, len, ref, results, x;
-          ref = $scope.people;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            x = ref[i];
-            results.push(x.show = true);
+          var x, _i, _len, _ref, _results;
+          _ref = $scope.people;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            x = _ref[_i];
+            _results.push(x.show = true);
           }
-          return results;
+          return _results;
         };
         return $scope.hide_all_people = function() {
-          var i, len, ref, results, x;
-          ref = $scope.people;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            x = ref[i];
-            results.push(x.show = false);
+          var x, _i, _len, _ref, _results;
+          _ref = $scope.people;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            x = _ref[_i];
+            _results.push(x.show = false);
           }
-          return results;
+          return _results;
         };
       },
       link: function(scope, element, attrs) {}
@@ -1965,13 +1965,13 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 
 (function() {
   'use strict';
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+  var __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __hasProp = {}.hasOwnProperty;
 
   angular.module('BB.Models').factory("Admin.BookingModel", function($q, BBModel, BaseModel) {
     var Admin_Booking;
-    return Admin_Booking = (function(superClass) {
-      extend(Admin_Booking, superClass);
+    return Admin_Booking = (function(_super) {
+      __extends(Admin_Booking, _super);
 
       function Admin_Booking(data) {
         Admin_Booking.__super__.constructor.apply(this, arguments);
@@ -1998,14 +1998,14 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         data.person_id = this.person_id;
         if (this.questions) {
           data.questions = (function() {
-            var i, len, ref, results;
-            ref = this.questions;
-            results = [];
-            for (i = 0, len = ref.length; i < len; i++) {
-              q = ref[i];
-              results.push(q.getPostData());
+            var _i, _len, _ref, _results;
+            _ref = this.questions;
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              q = _ref[_i];
+              _results.push(q.getPostData());
             }
-            return results;
+            return _results;
           }).call(this);
         }
         return data;
@@ -2072,13 +2072,13 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 
 (function() {
   'use strict';
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+  var __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __hasProp = {}.hasOwnProperty;
 
   angular.module('BB.Models').factory("Admin.LoginModel", function($q, BBModel, BaseModel) {
     var Admin_Login;
-    return Admin_Login = (function(superClass) {
-      extend(Admin_Login, superClass);
+    return Admin_Login = (function(_super) {
+      __extends(Admin_Login, _super);
 
       function Admin_Login(data) {
         Admin_Login.__super__.constructor.call(this, data);
@@ -2093,13 +2093,13 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 
 (function() {
   'use strict';
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+  var __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __hasProp = {}.hasOwnProperty;
 
   angular.module('BB.Models').factory("Admin.SlotModel", function($q, BBModel, BaseModel, TimeSlotModel) {
     var Admin_Slot;
-    return Admin_Slot = (function(superClass) {
-      extend(Admin_Slot, superClass);
+    return Admin_Slot = (function(_super) {
+      __extends(Admin_Slot, _super);
 
       function Admin_Slot(data) {
         Admin_Slot.__super__.constructor.call(this, data);
@@ -2129,13 +2129,13 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 }).call(this);
 
 (function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
+  var __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __hasProp = {}.hasOwnProperty;
 
   angular.module('BB.Models').factory("Admin.UserModel", function($q, BBModel, BaseModel) {
     var User;
-    return User = (function(superClass) {
-      extend(User, superClass);
+    return User = (function(_super) {
+      __extends(User, _super);
 
       function User() {
         return User.__super__.constructor.apply(this, arguments);
@@ -2175,13 +2175,13 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
             return collection.$get('bookings').then(function(bookings) {
               var b, models;
               models = (function() {
-                var i, len, results;
-                results = [];
-                for (i = 0, len = bookings.length; i < len; i++) {
-                  b = bookings[i];
-                  results.push(new BBModel.Admin.Booking(b));
+                var _i, _len, _results;
+                _results = [];
+                for (_i = 0, _len = bookings.length; _i < _len; _i++) {
+                  b = bookings[_i];
+                  _results.push(new BBModel.Admin.Booking(b));
                 }
-                return results;
+                return _results;
               })();
               return deferred.resolve(models);
             }, function(err) {
@@ -2200,10 +2200,10 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           halClient.$get(uri, {}).then((function(_this) {
             return function(found) {
               return found.$get('bookings').then(function(items) {
-                var i, item, len, sitems, spaces;
+                var item, sitems, spaces, _i, _len;
                 sitems = [];
-                for (i = 0, len = items.length; i < len; i++) {
-                  item = items[i];
+                for (_i = 0, _len = items.length; _i < _len; _i++) {
+                  item = items[_i];
                   sitems.push(new BBModel.Admin.Booking(item));
                 }
                 spaces = new $window.Collection.Booking(found, sitems, prms);
@@ -2425,10 +2425,10 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
             var client;
             if (resource.$has('clients')) {
               return resource.$get('clients').then(function(items) {
-                var clients, i, j, len, people;
+                var clients, i, people, _i, _len;
                 people = [];
-                for (j = 0, len = items.length; j < len; j++) {
-                  i = items[j];
+                for (_i = 0, _len = items.length; _i < _len; _i++) {
+                  i = items[_i];
                   people.push(new BBModel.Client(i));
                 }
                 clients = new $window.Collection.Client(resource, people, prms);
@@ -2503,12 +2503,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
   angular.module('BBAdmin.Services').factory('AdminCompanyService', function($q, BBModel, AdminLoginService, $rootScope, $sessionStorage) {
     return {
       query: function(params) {
-        var base, base1, base2, defer;
+        var defer, _base, _base1, _base2;
         defer = $q.defer();
         $rootScope.bb || ($rootScope.bb = {});
-        (base = $rootScope.bb).api_url || (base.api_url = $sessionStorage.getItem("host"));
-        (base1 = $rootScope.bb).api_url || (base1.api_url = params.apiUrl);
-        (base2 = $rootScope.bb).api_url || (base2.api_url = "");
+        (_base = $rootScope.bb).api_url || (_base.api_url = $sessionStorage.getItem("host"));
+        (_base1 = $rootScope.bb).api_url || (_base1.api_url = params.apiUrl);
+        (_base2 = $rootScope.bb).api_url || (_base2.api_url = "");
         AdminLoginService.checkLogin(params).then(function() {
           var login_form, options;
           if ($rootScope.user && $rootScope.user.company_id) {
@@ -2559,18 +2559,18 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         deferred = $q.defer();
         halClient.$get(uri, {}).then((function(_this) {
           return function(found) {
-            var item, j, len, mdays, ref;
+            var item, mdays, _i, _len, _ref;
             if (found.items) {
               mdays = [];
-              ref = found.items;
-              for (j = 0, len = ref.length; j < len; j++) {
-                item = ref[j];
+              _ref = found.items;
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                item = _ref[_i];
                 halClient.$get(item.uri).then(function(data) {
-                  var days, dcol, i, k, len1, ref1;
+                  var days, dcol, i, _j, _len1, _ref1;
                   days = [];
-                  ref1 = data.days;
-                  for (k = 0, len1 = ref1.length; k < len1; k++) {
-                    i = ref1[k];
+                  _ref1 = data.days;
+                  for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                    i = _ref1[_j];
                     if (i.type === prms.item) {
                       days.push(new BBModel.Day(i));
                     }
@@ -2816,13 +2816,13 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
               return slots_collection.$get('slots').then(function(slots) {
                 var s, slot_models;
                 slot_models = (function() {
-                  var i, len, results;
-                  results = [];
-                  for (i = 0, len = slots.length; i < len; i++) {
-                    s = slots[i];
-                    results.push(new BBModel.Admin.Slot(s));
+                  var _i, _len, _results;
+                  _results = [];
+                  for (_i = 0, _len = slots.length; _i < _len; _i++) {
+                    s = slots[_i];
+                    _results.push(new BBModel.Admin.Slot(s));
                   }
-                  return results;
+                  return _results;
                 })();
                 return deferred.resolve(slot_models);
               }, function(err) {
@@ -2840,10 +2840,10 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           halClient.$get(uri, {}).then((function(_this) {
             return function(found) {
               return found.$get('slots').then(function(items) {
-                var i, item, len, sitems, slots;
+                var item, sitems, slots, _i, _len;
                 sitems = [];
-                for (i = 0, len = items.length; i < len; i++) {
-                  item = items[i];
+                for (_i = 0, _len = items.length; _i < _len; _i++) {
+                  item = items[_i];
                   sitems.push(new BBModel.Admin.Slot(item));
                 }
                 slots = new $window.Collection.Slot(found, sitems, prms);
@@ -2941,17 +2941,17 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         }).then((function(_this) {
           return function(found) {
             return found.$get('events').then(function(events) {
-              var event, eventItem, eventItems, i, j, len, len1, ref, time, ts;
+              var event, eventItem, eventItems, time, ts, _i, _j, _len, _len1, _ref;
               eventItems = [];
-              for (i = 0, len = events.length; i < len; i++) {
-                eventItem = events[i];
+              for (_i = 0, _len = events.length; _i < _len; _i++) {
+                eventItem = events[_i];
                 event = {};
                 event.times = [];
                 event.event_id = eventItem.event_id;
                 event.person_id = found.person_id;
-                ref = eventItem.times;
-                for (j = 0, len1 = ref.length; j < len1; j++) {
-                  time = ref[j];
+                _ref = eventItem.times;
+                for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+                  time = _ref[_j];
                   ts = new BBModel.TimeSlot(time);
                   event.times.push(ts);
                 }
