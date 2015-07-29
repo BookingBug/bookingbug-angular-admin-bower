@@ -2836,6 +2836,15 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       }, {
         primary: '#3D9970',
         secondary: '#163728'
+      }, {
+        primary: '#85144B',
+        secondary: '#EB7AB1'
+      }, {
+        primary: '#2ECC40',
+        secondary: '#0E3E14'
+      }, {
+        primary: '#FF851B',
+        secondary: '#663000'
       }
     ];
     return {
@@ -3046,7 +3055,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         }
         user = $sessionStorage.getItem("user");
         if (user) {
-          $rootScope.user = halClient.createResource(user);
+          $rootScope.user = new BBModel.Admin.User(halClient.createResource(user));
           defer.resolve();
         } else {
           auth_token = $cookies['Auth-Token'];
@@ -3319,6 +3328,25 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           };
         })(this));
         return deferred.promise;
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('BB.Services').factory("BB.Service.login", function($q, BBModel) {
+    return {
+      unwrap: function(resource) {
+        return new BBModel.Admin.Login(resource);
+      }
+    };
+  });
+
+  angular.module('BB.Services').factory("BB.Service.base_login", function($q, BBModel) {
+    return {
+      unwrap: function(resource) {
+        return new BBModel.Admin.Login(resource);
       }
     };
   });
