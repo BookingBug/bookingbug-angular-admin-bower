@@ -1109,7 +1109,7 @@
     Booking.prototype.matchesParams = function(item) {
       if (this.params.start_date != null) {
         if (this.start_date == null) {
-          this.start_date = moment(this.params.date);
+          this.start_date = moment(this.params.start_date);
         }
         if (this.start_date.isAfter(item.start)) {
           return false;
@@ -2322,7 +2322,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.BookingModel", function($q, BBModel, BaseModel) {
+  angular.module('BB.Models').factory("Admin.BookingModel", function($q, BBModel, BaseModel, BookingCollections) {
     var Admin_Booking;
     return Admin_Booking = (function(superClass) {
       extend(Admin_Booking, superClass);
@@ -2411,7 +2411,8 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         data || (data = this.getPostData());
         return this.$put('self', {}, data).then((function(_this) {
           return function(res) {
-            return _this.constructor(res);
+            _this.constructor(res);
+            return BookingCollections.checkItems(_this);
           };
         })(this));
       };
@@ -2505,13 +2506,18 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
   angular.module('BBAdmin.Services').factory('AdminBookingService', function($q, $window, halClient, BookingCollections, BBModel, UriTemplate) {
     return {
       query: function(prms) {
-        var deferred, existing, href, uri, url;
+        var company, deferred, existing, href, uri, url;
         if (prms.slot) {
           prms.slot_id = prms.slot.id;
         }
         if (prms.date) {
           prms.start_date = prms.date;
           prms.end_date = prms.date;
+        }
+        if (prms.company) {
+          company = prms.company;
+          delete prms.company;
+          prms.company_id = company.id;
         }
         if (prms.per_page == null) {
           prms.per_page = 1024;
@@ -2523,10 +2529,10 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         existing = BookingCollections.find(prms);
         if (existing) {
           deferred.resolve(existing);
-        } else if (prms.company) {
-          prms.company.$get('bookings', prms).then(function(collection) {
+        } else if (company) {
+          company.$get('bookings', prms).then(function(collection) {
             return collection.$get('bookings').then(function(bookings) {
-              var b, models;
+              var b, models, spaces;
               models = (function() {
                 var i, len, results;
                 results = [];
@@ -2536,7 +2542,9 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
                 }
                 return results;
               })();
-              return deferred.resolve(models);
+              spaces = new $window.Collection.Booking(collection, models, prms);
+              BookingCollections.add(spaces);
+              return deferred.resolve(spaces);
             }, function(err) {
               return deferred.reject(err);
             });
