@@ -3148,7 +3148,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return defer.promise;
       },
       markAsPaid: function(params) {
-        var company_id, defer, uri;
+        var company_id, data, defer, uri;
         defer = $q.defer();
         if (!params.purchase || !params.url_root) {
           defer.reject("invalid request");
@@ -3158,7 +3158,32 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           company_id = params.company.id;
         }
         uri = params.url_root + ("/api/v1/admin/" + company_id + "/purchases/" + params.purchase.id + "/pay");
-        halClient.$put(uri, params).then(function(purchase) {
+        data = {};
+        if (params.company) {
+          data.company_id = params.company.id;
+        }
+        if (params.notify_admin) {
+          data.notify_admin = params.notify_admin;
+        }
+        if (params.payment_status) {
+          data.payment_status = params.payment_status;
+        }
+        if (params.amount) {
+          data.amount = params.amount;
+        }
+        if (params.notes) {
+          data.notes = params.notes;
+        }
+        if (params.transaction_id) {
+          data.transaction_id = params.transaction_id;
+        }
+        if (params.notify) {
+          data.notify = params.notify;
+        }
+        if (params.payment_type) {
+          data.payment_type = params.payment_type;
+        }
+        halClient.$put(uri, params, data).then(function(purchase) {
           purchase = new BBModel.Purchase.Total(purchase);
           return defer.resolve(purchase);
         }, function(err) {
