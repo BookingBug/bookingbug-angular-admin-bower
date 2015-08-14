@@ -2417,6 +2417,16 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         })(this));
       };
 
+      Admin_Booking.prototype.$refetch = function() {
+        this.$flush('self');
+        return this.$get('self').then((function(_this) {
+          return function(res) {
+            _this.constructor(res);
+            return BookingCollections.checkItems(_this);
+          };
+        })(this));
+      };
+
       return Admin_Booking;
 
     })(BaseModel);
