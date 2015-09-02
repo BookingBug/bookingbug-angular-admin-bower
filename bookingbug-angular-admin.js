@@ -1092,500 +1092,6 @@
 }).call(this);
 
 (function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  window.Collection.Booking = (function(superClass) {
-    extend(Booking, superClass);
-
-    function Booking() {
-      return Booking.__super__.constructor.apply(this, arguments);
-    }
-
-    Booking.prototype.checkItem = function(item) {
-      return Booking.__super__.checkItem.apply(this, arguments);
-    };
-
-    Booking.prototype.matchesParams = function(item) {
-      if (this.params.start_date != null) {
-        if (this.start_date == null) {
-          this.start_date = moment(this.params.start_date);
-        }
-        if (this.start_date.isAfter(item.start)) {
-          return false;
-        }
-      }
-      if (this.params.end_date != null) {
-        if (this.end_date == null) {
-          this.end_date = moment(this.params.end_date);
-        }
-        if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
-          return false;
-        }
-      }
-      if (!this.params.include_cancelled && item.is_cancelled) {
-        return false;
-      }
-      return true;
-    };
-
-    return Booking;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("BookingCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  window.Collection.Client = (function(superClass) {
-    extend(Client, superClass);
-
-    function Client() {
-      return Client.__super__.constructor.apply(this, arguments);
-    }
-
-    Client.prototype.checkItem = function(item) {
-      return Client.__super__.checkItem.apply(this, arguments);
-    };
-
-    return Client;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("ClientCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  window.Collection.Slot = (function(superClass) {
-    extend(Slot, superClass);
-
-    function Slot() {
-      return Slot.__super__.constructor.apply(this, arguments);
-    }
-
-    Slot.prototype.checkItem = function(item) {
-      return Slot.__super__.checkItem.apply(this, arguments);
-    };
-
-    Slot.prototype.matchesParams = function(item) {
-      if (this.params.start_date) {
-        this.start_date || (this.start_date = moment(this.params.start_date));
-        if (this.start_date.isAfter(item.date)) {
-          return false;
-        }
-      }
-      if (this.params.end_date) {
-        this.end_date || (this.end_date = moment(this.params.end_date));
-        if (this.end_date.isBefore(item.date)) {
-          return false;
-        }
-      }
-      return true;
-    };
-
-    return Slot;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("SlotCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('BBAdmin.Directives').directive('adminLogin', function($modal, $log, $rootScope, AdminLoginService, $templateCache, $q) {
-    var link, loginAdminController, pickCompanyController;
-    loginAdminController = function($scope, $modalInstance, company_id) {
-      $scope.title = 'Login';
-      $scope.schema = {
-        type: 'object',
-        properties: {
-          email: {
-            type: 'string',
-            title: 'Email'
-          },
-          password: {
-            type: 'string',
-            title: 'Password'
-          }
-        }
-      };
-      $scope.form = [
-        {
-          key: 'email',
-          type: 'email',
-          feedback: false,
-          autofocus: true
-        }, {
-          key: 'password',
-          type: 'password',
-          feedback: false
-        }
-      ];
-      $scope.login_form = {};
-      $scope.submit = function(form) {
-        var options;
-        options = {
-          company_id: company_id
-        };
-        return AdminLoginService.login(form, options).then(function(admin) {
-          admin.email = form.email;
-          admin.password = form.password;
-          return $modalInstance.close(admin);
-        }, function(err) {
-          return $modalInstance.dismiss(err);
-        });
-      };
-      return $scope.cancel = function() {
-        return $modalInstance.dismiss('cancel');
-      };
-    };
-    pickCompanyController = function($scope, $modalInstance, companies) {
-      var c;
-      $scope.title = 'Pick Company';
-      $scope.schema = {
-        type: 'object',
-        properties: {
-          company_id: {
-            type: 'integer',
-            title: 'Company'
-          }
-        }
-      };
-      $scope.schema.properties.company_id["enum"] = (function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = companies.length; i < len; i++) {
-          c = companies[i];
-          results.push(c.id);
-        }
-        return results;
-      })();
-      $scope.form = [
-        {
-          key: 'company_id',
-          type: 'select',
-          titleMap: (function() {
-            var i, len, results;
-            results = [];
-            for (i = 0, len = companies.length; i < len; i++) {
-              c = companies[i];
-              results.push({
-                value: c.id,
-                name: c.name
-              });
-            }
-            return results;
-          })(),
-          autofocus: true
-        }
-      ];
-      $scope.pick_company_form = {};
-      $scope.submit = function(form) {
-        return $modalInstance.close(form.company_id);
-      };
-      return $scope.cancel = function() {
-        return $modalInstance.dismiss('cancel');
-      };
-    };
-    link = function(scope, element, attrs) {
-      var base, base1, loginModal, pickCompanyModal, tryLogin;
-      console.log('admin login link');
-      $rootScope.bb || ($rootScope.bb = {});
-      (base = $rootScope.bb).api_url || (base.api_url = scope.apiUrl);
-      (base1 = $rootScope.bb).api_url || (base1.api_url = "http://www.bookingbug.com");
-      loginModal = function() {
-        var modalInstance;
-        modalInstance = $modal.open({
-          templateUrl: 'login_modal_form.html',
-          controller: loginAdminController,
-          resolve: {
-            company_id: function() {
-              return scope.companyId;
-            }
-          }
-        });
-        return modalInstance.result.then(function(result) {
-          scope.adminEmail = result.email;
-          scope.adminPassword = result.password;
-          if (result.$has('admins')) {
-            return result.$get('admins').then(function(admins) {
-              var m;
-              scope.admins = admins;
-              return $q.all((function() {
-                var i, len, results;
-                results = [];
-                for (i = 0, len = admins.length; i < len; i++) {
-                  m = admins[i];
-                  results.push(m.$get('company'));
-                }
-                return results;
-              })()).then(function(companies) {
-                return pickCompanyModal(companies);
-              });
-            });
-          } else {
-            return scope.admin = result;
-          }
-        }, function() {
-          return loginModal();
-        });
-      };
-      pickCompanyModal = function(companies) {
-        var modalInstance;
-        modalInstance = $modal.open({
-          templateUrl: 'pick_company_modal_form.html',
-          controller: pickCompanyController,
-          resolve: {
-            companies: function() {
-              return companies;
-            }
-          }
-        });
-        return modalInstance.result.then(function(company_id) {
-          scope.companyId = company_id;
-          return tryLogin();
-        }, function() {
-          return pickCompanyModal();
-        });
-      };
-      tryLogin = function() {
-        var login_form, options;
-        login_form = {
-          email: scope.adminEmail,
-          password: scope.adminPassword
-        };
-        options = {
-          company_id: scope.companyId
-        };
-        return AdminLoginService.login(login_form, options).then(function(result) {
-          if (result.$has('admins')) {
-            return result.$get('admins').then(function(admins) {
-              var a;
-              scope.admins = admins;
-              return $q.all((function() {
-                var i, len, results;
-                results = [];
-                for (i = 0, len = admins.length; i < len; i++) {
-                  a = admins[i];
-                  results.push(a.$get('company'));
-                }
-                return results;
-              })()).then(function(companies) {
-                return pickCompanyModal(companies);
-              });
-            });
-          } else {
-            return scope.admin = result;
-          }
-        }, function(err) {
-          return loginModal();
-        });
-      };
-      if (scope.adminEmail && scope.adminPassword) {
-        return tryLogin();
-      } else {
-        return loginModal();
-      }
-    };
-    return {
-      link: link,
-      scope: {
-        adminEmail: '@',
-        adminPassword: '@',
-        companyId: '@',
-        apiUrl: '@',
-        admin: '='
-      },
-      transclude: true,
-      template: "<div ng-hide='admin'><img src='/BB_wait.gif' class=\"loader\"></div>\n<div ng-show='admin' ng-transclude></div>"
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('BBAdmin').directive('bookingTable', function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
-    var controller, link;
-    controller = function($scope) {
-      $scope.fields = ['id', 'datetime'];
-      $scope.getBookings = function() {
-        var params;
-        params = {
-          company: $scope.company
-        };
-        return AdminBookingService.query(params).then(function(bookings) {
-          return $scope.bookings = bookings;
-        });
-      };
-      $scope.newBooking = function() {
-        return ModalForm["new"]({
-          company: $scope.company,
-          title: 'New Booking',
-          new_rel: 'new_booking',
-          post_rel: 'bookings',
-          success: function(booking) {
-            return $scope.bookings.push(booking);
-          }
-        });
-      };
-      return $scope.edit = function(booking) {
-        return ModalForm.edit({
-          model: booking,
-          title: 'Edit Booking'
-        });
-      };
-    };
-    link = function(scope, element, attrs) {
-      if (scope.company) {
-        return scope.getBookings();
-      } else {
-        return AdminCompanyService.query(attrs).then(function(company) {
-          scope.company = company;
-          return scope.getBookings();
-        });
-      }
-    };
-    return {
-      controller: controller,
-      link: link,
-      templateUrl: 'booking_table_main.html'
-    };
-  });
-
-}).call(this);
-
-
-
-angular.module('BBAdmin.Directives').controller('CalController', function($scope) {
-    /* config object */
-    $scope.calendarConfig = {
-        height: 450,
-        editiable: true,
-        dayClick: function(){
-            scope.$apply($scope.alertEventOnClick);
-        }
-    };
-});
-
-(function() {
-  'use strict';
-  angular.module('BBAdmin.Directives').directive('bbPeopleList', function($rootScope) {
-    return {
-      restrict: 'AE',
-      replace: true,
-      scope: true,
-      controller: function($scope, $rootScope, PersonService, $q, BBModel, PersonModel) {
-        $rootScope.connection_started.then(function() {
-          return $scope.bb.company.getPeoplePromise().then(function(people) {
-            var i, len, person, results;
-            $scope.people = people;
-            results = [];
-            for (i = 0, len = people.length; i < len; i++) {
-              person = people[i];
-              results.push(person.show = true);
-            }
-            return results;
-          });
-        });
-        $scope.show_all_people = function() {
-          var i, len, ref, results, x;
-          ref = $scope.people;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            x = ref[i];
-            results.push(x.show = true);
-          }
-          return results;
-        };
-        return $scope.hide_all_people = function() {
-          var i, len, ref, results, x;
-          ref = $scope.people;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            x = ref[i];
-            results.push(x.show = false);
-          }
-          return results;
-        };
-      },
-      link: function(scope, element, attrs) {}
-    };
-  });
-
-  angular.module('BBAdmin.Directives').directive('bbBookingList', function() {
-    return {
-      restrict: 'AE',
-      replace: true,
-      scope: {
-        bookings: '=',
-        cancelled: '=',
-        params: '='
-      },
-      templateUrl: function(tElm, tAttrs) {
-        return tAttrs.template;
-      },
-      controller: function($scope, $filter) {
-        var status;
-        $scope.title = $scope.params.title;
-        status = $scope.params.status;
-        return $scope.$watch(function() {
-          return $scope.bookings;
-        }, function() {
-          var bookings, cancelled;
-          bookings = $scope.bookings;
-          cancelled = $scope.cancelled;
-          if (cancelled == null) {
-            cancelled = false;
-          }
-          if ((bookings != null)) {
-            bookings = $filter('filter')(bookings, function(booking) {
-              var ret;
-              ret = booking.is_cancelled === cancelled;
-              if ((status != null)) {
-                ret &= booking.hasStatus(status);
-              } else {
-                ret &= (booking.multi_status == null) || Object.keys(booking.multi_status).length === 0;
-              }
-              ret &= booking.status === 4;
-              return ret;
-            });
-            $scope.relevantBookings = $filter('orderBy')(bookings, 'datetime');
-          }
-          return $scope.relevantBookings != null ? $scope.relevantBookings : $scope.relevantBookings = [];
-        });
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
   'use strict';
   angular.module('BBAdmin.Controllers').controller('CalendarCtrl', function($scope, AdminBookingService, $rootScope) {
 
@@ -2280,6 +1786,132 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Booking = (function(superClass) {
+    extend(Booking, superClass);
+
+    function Booking() {
+      return Booking.__super__.constructor.apply(this, arguments);
+    }
+
+    Booking.prototype.checkItem = function(item) {
+      return Booking.__super__.checkItem.apply(this, arguments);
+    };
+
+    Booking.prototype.matchesParams = function(item) {
+      if (this.params.start_date != null) {
+        if (this.start_date == null) {
+          this.start_date = moment(this.params.start_date);
+        }
+        if (this.start_date.isAfter(item.start)) {
+          return false;
+        }
+      }
+      if (this.params.end_date != null) {
+        if (this.end_date == null) {
+          this.end_date = moment(this.params.end_date);
+        }
+        if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
+          return false;
+        }
+      }
+      if (!this.params.include_cancelled && item.is_cancelled) {
+        return false;
+      }
+      return true;
+    };
+
+    return Booking;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("BookingCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Client = (function(superClass) {
+    extend(Client, superClass);
+
+    function Client() {
+      return Client.__super__.constructor.apply(this, arguments);
+    }
+
+    Client.prototype.checkItem = function(item) {
+      return Client.__super__.checkItem.apply(this, arguments);
+    };
+
+    return Client;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("ClientCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Slot = (function(superClass) {
+    extend(Slot, superClass);
+
+    function Slot() {
+      return Slot.__super__.constructor.apply(this, arguments);
+    }
+
+    Slot.prototype.checkItem = function(item) {
+      return Slot.__super__.checkItem.apply(this, arguments);
+    };
+
+    Slot.prototype.matchesParams = function(item) {
+      if (this.params.start_date) {
+        this.start_date || (this.start_date = moment(this.params.start_date));
+        if (this.start_date.isAfter(item.date)) {
+          return false;
+        }
+      }
+      if (this.params.end_date) {
+        this.end_date || (this.end_date = moment(this.params.end_date));
+        if (this.end_date.isBefore(item.date)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    return Slot;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("SlotCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
   'use strict';
   var bbAdminFilters;
 
@@ -2312,6 +1944,374 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
   bbAdminFilters.filter('time', function($window) {
     return function(v) {
       return $window.sprintf("%02d:%02d", Math.floor(v / 60), v % 60);
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('BBAdmin.Directives').directive('adminLogin', function($modal, $log, $rootScope, AdminLoginService, $templateCache, $q) {
+    var link, loginAdminController, pickCompanyController;
+    loginAdminController = function($scope, $modalInstance, company_id) {
+      $scope.title = 'Login';
+      $scope.schema = {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            title: 'Email'
+          },
+          password: {
+            type: 'string',
+            title: 'Password'
+          }
+        }
+      };
+      $scope.form = [
+        {
+          key: 'email',
+          type: 'email',
+          feedback: false,
+          autofocus: true
+        }, {
+          key: 'password',
+          type: 'password',
+          feedback: false
+        }
+      ];
+      $scope.login_form = {};
+      $scope.submit = function(form) {
+        var options;
+        options = {
+          company_id: company_id
+        };
+        return AdminLoginService.login(form, options).then(function(admin) {
+          admin.email = form.email;
+          admin.password = form.password;
+          return $modalInstance.close(admin);
+        }, function(err) {
+          return $modalInstance.dismiss(err);
+        });
+      };
+      return $scope.cancel = function() {
+        return $modalInstance.dismiss('cancel');
+      };
+    };
+    pickCompanyController = function($scope, $modalInstance, companies) {
+      var c;
+      $scope.title = 'Pick Company';
+      $scope.schema = {
+        type: 'object',
+        properties: {
+          company_id: {
+            type: 'integer',
+            title: 'Company'
+          }
+        }
+      };
+      $scope.schema.properties.company_id["enum"] = (function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = companies.length; i < len; i++) {
+          c = companies[i];
+          results.push(c.id);
+        }
+        return results;
+      })();
+      $scope.form = [
+        {
+          key: 'company_id',
+          type: 'select',
+          titleMap: (function() {
+            var i, len, results;
+            results = [];
+            for (i = 0, len = companies.length; i < len; i++) {
+              c = companies[i];
+              results.push({
+                value: c.id,
+                name: c.name
+              });
+            }
+            return results;
+          })(),
+          autofocus: true
+        }
+      ];
+      $scope.pick_company_form = {};
+      $scope.submit = function(form) {
+        return $modalInstance.close(form.company_id);
+      };
+      return $scope.cancel = function() {
+        return $modalInstance.dismiss('cancel');
+      };
+    };
+    link = function(scope, element, attrs) {
+      var base, base1, loginModal, pickCompanyModal, tryLogin;
+      console.log('admin login link');
+      $rootScope.bb || ($rootScope.bb = {});
+      (base = $rootScope.bb).api_url || (base.api_url = scope.apiUrl);
+      (base1 = $rootScope.bb).api_url || (base1.api_url = "http://www.bookingbug.com");
+      loginModal = function() {
+        var modalInstance;
+        modalInstance = $modal.open({
+          templateUrl: 'login_modal_form.html',
+          controller: loginAdminController,
+          resolve: {
+            company_id: function() {
+              return scope.companyId;
+            }
+          }
+        });
+        return modalInstance.result.then(function(result) {
+          scope.adminEmail = result.email;
+          scope.adminPassword = result.password;
+          if (result.$has('admins')) {
+            return result.$get('admins').then(function(admins) {
+              var m;
+              scope.admins = admins;
+              return $q.all((function() {
+                var i, len, results;
+                results = [];
+                for (i = 0, len = admins.length; i < len; i++) {
+                  m = admins[i];
+                  results.push(m.$get('company'));
+                }
+                return results;
+              })()).then(function(companies) {
+                return pickCompanyModal(companies);
+              });
+            });
+          } else {
+            return scope.admin = result;
+          }
+        }, function() {
+          return loginModal();
+        });
+      };
+      pickCompanyModal = function(companies) {
+        var modalInstance;
+        modalInstance = $modal.open({
+          templateUrl: 'pick_company_modal_form.html',
+          controller: pickCompanyController,
+          resolve: {
+            companies: function() {
+              return companies;
+            }
+          }
+        });
+        return modalInstance.result.then(function(company_id) {
+          scope.companyId = company_id;
+          return tryLogin();
+        }, function() {
+          return pickCompanyModal();
+        });
+      };
+      tryLogin = function() {
+        var login_form, options;
+        login_form = {
+          email: scope.adminEmail,
+          password: scope.adminPassword
+        };
+        options = {
+          company_id: scope.companyId
+        };
+        return AdminLoginService.login(login_form, options).then(function(result) {
+          if (result.$has('admins')) {
+            return result.$get('admins').then(function(admins) {
+              var a;
+              scope.admins = admins;
+              return $q.all((function() {
+                var i, len, results;
+                results = [];
+                for (i = 0, len = admins.length; i < len; i++) {
+                  a = admins[i];
+                  results.push(a.$get('company'));
+                }
+                return results;
+              })()).then(function(companies) {
+                return pickCompanyModal(companies);
+              });
+            });
+          } else {
+            return scope.admin = result;
+          }
+        }, function(err) {
+          return loginModal();
+        });
+      };
+      if (scope.adminEmail && scope.adminPassword) {
+        return tryLogin();
+      } else {
+        return loginModal();
+      }
+    };
+    return {
+      link: link,
+      scope: {
+        adminEmail: '@',
+        adminPassword: '@',
+        companyId: '@',
+        apiUrl: '@',
+        admin: '='
+      },
+      transclude: true,
+      template: "<div ng-hide='admin'><img src='/BB_wait.gif' class=\"loader\"></div>\n<div ng-show='admin' ng-transclude></div>"
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('BBAdmin').directive('bookingTable', function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
+    var controller, link;
+    controller = function($scope) {
+      $scope.fields = ['id', 'datetime'];
+      $scope.getBookings = function() {
+        var params;
+        params = {
+          company: $scope.company
+        };
+        return AdminBookingService.query(params).then(function(bookings) {
+          return $scope.bookings = bookings;
+        });
+      };
+      $scope.newBooking = function() {
+        return ModalForm["new"]({
+          company: $scope.company,
+          title: 'New Booking',
+          new_rel: 'new_booking',
+          post_rel: 'bookings',
+          success: function(booking) {
+            return $scope.bookings.push(booking);
+          }
+        });
+      };
+      return $scope.edit = function(booking) {
+        return ModalForm.edit({
+          model: booking,
+          title: 'Edit Booking'
+        });
+      };
+    };
+    link = function(scope, element, attrs) {
+      if (scope.company) {
+        return scope.getBookings();
+      } else {
+        return AdminCompanyService.query(attrs).then(function(company) {
+          scope.company = company;
+          return scope.getBookings();
+        });
+      }
+    };
+    return {
+      controller: controller,
+      link: link,
+      templateUrl: 'booking_table_main.html'
+    };
+  });
+
+}).call(this);
+
+
+
+angular.module('BBAdmin.Directives').controller('CalController', function($scope) {
+    /* config object */
+    $scope.calendarConfig = {
+        height: 450,
+        editiable: true,
+        dayClick: function(){
+            scope.$apply($scope.alertEventOnClick);
+        }
+    };
+});
+
+(function() {
+  'use strict';
+  angular.module('BBAdmin.Directives').directive('bbPeopleList', function($rootScope) {
+    return {
+      restrict: 'AE',
+      replace: true,
+      scope: true,
+      controller: function($scope, $rootScope, PersonService, $q, BBModel, PersonModel) {
+        $rootScope.connection_started.then(function() {
+          return $scope.bb.company.getPeoplePromise().then(function(people) {
+            var i, len, person, results;
+            $scope.people = people;
+            results = [];
+            for (i = 0, len = people.length; i < len; i++) {
+              person = people[i];
+              results.push(person.show = true);
+            }
+            return results;
+          });
+        });
+        $scope.show_all_people = function() {
+          var i, len, ref, results, x;
+          ref = $scope.people;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push(x.show = true);
+          }
+          return results;
+        };
+        return $scope.hide_all_people = function() {
+          var i, len, ref, results, x;
+          ref = $scope.people;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push(x.show = false);
+          }
+          return results;
+        };
+      },
+      link: function(scope, element, attrs) {}
+    };
+  });
+
+  angular.module('BBAdmin.Directives').directive('bbBookingList', function() {
+    return {
+      restrict: 'AE',
+      replace: true,
+      scope: {
+        bookings: '=',
+        cancelled: '=',
+        params: '='
+      },
+      templateUrl: function(tElm, tAttrs) {
+        return tAttrs.template;
+      },
+      controller: function($scope, $filter) {
+        var status;
+        $scope.title = $scope.params.title;
+        status = $scope.params.status;
+        return $scope.$watch(function() {
+          return $scope.bookings;
+        }, function() {
+          var bookings, cancelled;
+          bookings = $scope.bookings;
+          cancelled = $scope.cancelled;
+          if (cancelled == null) {
+            cancelled = false;
+          }
+          if ((bookings != null)) {
+            bookings = $filter('filter')(bookings, function(booking) {
+              var ret;
+              ret = booking.is_cancelled === cancelled;
+              if ((status != null)) {
+                ret &= booking.hasStatus(status);
+              } else {
+                ret &= (booking.multi_status == null) || Object.keys(booking.multi_status).length === 0;
+              }
+              ret &= booking.status === 4;
+              return ret;
+            });
+            $scope.relevantBookings = $filter('orderBy')(bookings, 'datetime');
+          }
+          return $scope.relevantBookings != null ? $scope.relevantBookings : $scope.relevantBookings = [];
+        });
+      }
     };
   });
 
