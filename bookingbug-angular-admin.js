@@ -1092,6 +1092,132 @@
 }).call(this);
 
 (function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Booking = (function(superClass) {
+    extend(Booking, superClass);
+
+    function Booking() {
+      return Booking.__super__.constructor.apply(this, arguments);
+    }
+
+    Booking.prototype.checkItem = function(item) {
+      return Booking.__super__.checkItem.apply(this, arguments);
+    };
+
+    Booking.prototype.matchesParams = function(item) {
+      if (this.params.start_date != null) {
+        if (this.start_date == null) {
+          this.start_date = moment(this.params.start_date);
+        }
+        if (this.start_date.isAfter(item.start)) {
+          return false;
+        }
+      }
+      if (this.params.end_date != null) {
+        if (this.end_date == null) {
+          this.end_date = moment(this.params.end_date);
+        }
+        if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
+          return false;
+        }
+      }
+      if (!this.params.include_cancelled && item.is_cancelled) {
+        return false;
+      }
+      return true;
+    };
+
+    return Booking;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("BookingCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Client = (function(superClass) {
+    extend(Client, superClass);
+
+    function Client() {
+      return Client.__super__.constructor.apply(this, arguments);
+    }
+
+    Client.prototype.checkItem = function(item) {
+      return Client.__super__.checkItem.apply(this, arguments);
+    };
+
+    return Client;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("ClientCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  window.Collection.Slot = (function(superClass) {
+    extend(Slot, superClass);
+
+    function Slot() {
+      return Slot.__super__.constructor.apply(this, arguments);
+    }
+
+    Slot.prototype.checkItem = function(item) {
+      return Slot.__super__.checkItem.apply(this, arguments);
+    };
+
+    Slot.prototype.matchesParams = function(item) {
+      if (this.params.start_date) {
+        this.start_date || (this.start_date = moment(this.params.start_date));
+        if (this.start_date.isAfter(item.date)) {
+          return false;
+        }
+      }
+      if (this.params.end_date) {
+        this.end_date || (this.end_date = moment(this.params.end_date));
+        if (this.end_date.isBefore(item.date)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    return Slot;
+
+  })(window.Collection.Base);
+
+  angular.module('BB.Services').provider("SlotCollections", function() {
+    return {
+      $get: function() {
+        return new window.BaseCollections();
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
   'use strict';
   angular.module('BBAdmin.Controllers').controller('CalendarCtrl', function($scope, AdminBookingService, $rootScope) {
 
@@ -1786,6 +1912,44 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
+  'use strict';
+  var bbAdminFilters;
+
+  bbAdminFilters = angular.module('BBAdmin.Filters', []);
+
+  bbAdminFilters.filter('rag', function() {
+    return function(value, v1, v2) {
+      if (value <= v1) {
+        return "red";
+      } else if (value <= v2) {
+        return "amber";
+      } else {
+        return "green";
+      }
+    };
+  });
+
+  bbAdminFilters.filter('gar', function() {
+    return function(value, v1, v2) {
+      if (value <= v1) {
+        return "green";
+      } else if (value <= v2) {
+        return "amber";
+      } else {
+        return "red";
+      }
+    };
+  });
+
+  bbAdminFilters.filter('time', function($window) {
+    return function(v) {
+      return $window.sprintf("%02d:%02d", Math.floor(v / 60), v % 60);
+    };
+  });
+
+}).call(this);
+
+(function() {
   angular.module('BBAdmin.Directives').directive('adminLogin', function($modal, $log, $rootScope, AdminLoginService, $templateCache, $q) {
     var link, loginAdminController, pickCompanyController;
     loginAdminController = function($scope, $modalInstance, company_id) {
@@ -2147,170 +2311,6 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           }
           return $scope.relevantBookings != null ? $scope.relevantBookings : $scope.relevantBookings = [];
         });
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  'use strict';
-  var bbAdminFilters;
-
-  bbAdminFilters = angular.module('BBAdmin.Filters', []);
-
-  bbAdminFilters.filter('rag', function() {
-    return function(value, v1, v2) {
-      if (value <= v1) {
-        return "red";
-      } else if (value <= v2) {
-        return "amber";
-      } else {
-        return "green";
-      }
-    };
-  });
-
-  bbAdminFilters.filter('gar', function() {
-    return function(value, v1, v2) {
-      if (value <= v1) {
-        return "green";
-      } else if (value <= v2) {
-        return "amber";
-      } else {
-        return "red";
-      }
-    };
-  });
-
-  bbAdminFilters.filter('time', function($window) {
-    return function(v) {
-      return $window.sprintf("%02d:%02d", Math.floor(v / 60), v % 60);
-    };
-  });
-
-}).call(this);
-
-(function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  window.Collection.Booking = (function(superClass) {
-    extend(Booking, superClass);
-
-    function Booking() {
-      return Booking.__super__.constructor.apply(this, arguments);
-    }
-
-    Booking.prototype.checkItem = function(item) {
-      return Booking.__super__.checkItem.apply(this, arguments);
-    };
-
-    Booking.prototype.matchesParams = function(item) {
-      if (this.params.start_date != null) {
-        if (this.start_date == null) {
-          this.start_date = moment(this.params.start_date);
-        }
-        if (this.start_date.isAfter(item.start)) {
-          return false;
-        }
-      }
-      if (this.params.end_date != null) {
-        if (this.end_date == null) {
-          this.end_date = moment(this.params.end_date);
-        }
-        if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
-          return false;
-        }
-      }
-      if (!this.params.include_cancelled && item.is_cancelled) {
-        return false;
-      }
-      return true;
-    };
-
-    return Booking;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("BookingCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  window.Collection.Client = (function(superClass) {
-    extend(Client, superClass);
-
-    function Client() {
-      return Client.__super__.constructor.apply(this, arguments);
-    }
-
-    Client.prototype.checkItem = function(item) {
-      return Client.__super__.checkItem.apply(this, arguments);
-    };
-
-    return Client;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("ClientCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  window.Collection.Slot = (function(superClass) {
-    extend(Slot, superClass);
-
-    function Slot() {
-      return Slot.__super__.constructor.apply(this, arguments);
-    }
-
-    Slot.prototype.checkItem = function(item) {
-      return Slot.__super__.checkItem.apply(this, arguments);
-    };
-
-    Slot.prototype.matchesParams = function(item) {
-      if (this.params.start_date) {
-        this.start_date || (this.start_date = moment(this.params.start_date));
-        if (this.start_date.isAfter(item.date)) {
-          return false;
-        }
-      }
-      if (this.params.end_date) {
-        this.end_date || (this.end_date = moment(this.params.end_date));
-        if (this.end_date.isBefore(item.date)) {
-          return false;
-        }
-      }
-      return true;
-    };
-
-    return Slot;
-
-  })(window.Collection.Base);
-
-  angular.module('BB.Services').provider("SlotCollections", function() {
-    return {
-      $get: function() {
-        return new window.BaseCollections();
       }
     };
   });
