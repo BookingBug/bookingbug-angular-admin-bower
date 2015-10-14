@@ -3106,10 +3106,13 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
             halClient.$get(href, options).then((function(_this) {
               return function(login) {
                 if (login.$has('administrator')) {
-                  return login.$get('administrator').then(function(user) {
-                    $rootScope.user = new BBModel.Admin.User(user);
-                    return defer.resolve();
+                  login.$get('administrator').then(function(user) {
+                    auth_token = user.getOption('auth_token');
+                    user = new BBModel.Admin.User(user);
+                    $sessionStorage.setItem("auth_token", auth_token);
+                    return $rootScope.user = user;
                   });
+                  return defer.resolve();
                 } else {
                   return defer.resolve();
                 }
