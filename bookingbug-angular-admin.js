@@ -2407,9 +2407,33 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return Math.floor((moment().unix() - start) / 60);
       };
 
+      Admin_Booking.prototype.answer = function(q) {
+        var a, i, len, ref;
+        if (this.answers_summary) {
+          ref = this.answers_summary;
+          for (i = 0, len = ref.length; i < len; i++) {
+            a = ref[i];
+            if (a.name === q) {
+              return a.answer;
+            }
+          }
+        }
+        return null;
+      };
+
       Admin_Booking.prototype.$update = function(data) {
         data || (data = this.getPostData());
         return this.$put('self', {}, data).then((function(_this) {
+          return function(res) {
+            _this.constructor(res);
+            return BookingCollections.checkItems(_this);
+          };
+        })(this));
+      };
+
+      Admin_Booking.prototype.$refetch = function() {
+        this.$flush('self');
+        return this.$get('self').then((function(_this) {
           return function(res) {
             _this.constructor(res);
             return BookingCollections.checkItems(_this);
