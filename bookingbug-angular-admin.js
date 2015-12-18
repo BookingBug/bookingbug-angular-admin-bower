@@ -1477,7 +1477,6 @@
 
 (function() {
   angular.module('BBAdmin.Controllers').controller('DashboardContainer', function($scope, $rootScope, $location, $modal) {
-    var ModalInstanceCtrl;
     $scope.selectedBooking = null;
     $scope.poppedBooking = null;
     $scope.selectBooking = function(booking) {
@@ -1486,7 +1485,7 @@
     $scope.popupBooking = function(booking) {
       var modalInstance;
       $scope.poppedBooking = booking;
-      modalInstance = $modal.open({
+      return modalInstance = $modal.open({
         templateUrl: 'full_booking_details',
         controller: ModalInstanceCtrl,
         scope: $scope,
@@ -1501,43 +1500,9 @@
           })(this)
         }
       });
-      return modalInstance.result.then((function(_this) {
-        return function(selectedItem) {
-          return $scope.selected = selectedItem;
-        };
-      })(this), (function(_this) {
-        return function() {
-          return console.log('Modal dismissed at: ' + new Date());
-        };
-      })(this));
     };
-    ModalInstanceCtrl = function($scope, $modalInstance, items) {
-      angular.extend($scope, items);
-      $scope.ok = function() {
-        if (items.booking && items.booking.self) {
-          items.booking.$update();
-        }
-        return $modalInstance.close();
-      };
-      return $scope.cancel = function() {
-        return $modalInstance.dismiss('cancel');
-      };
-    };
-    return $scope.popupTimeAction = function(prms) {
-      var modalInstance;
-      return modalInstance = $modal.open({
-        templateUrl: $scope.partial_url + 'time_popup',
-        controller: ModalInstanceCtrl,
-        scope: $scope,
-        backdrop: false,
-        resolve: {
-          items: (function(_this) {
-            return function() {
-              return prms;
-            };
-          })(this)
-        }
-      });
+    return $scope.test = function() {
+      return alert("test woot");
     };
   });
 
