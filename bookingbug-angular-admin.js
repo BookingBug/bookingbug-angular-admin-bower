@@ -1386,7 +1386,7 @@
     };
   });
 
-  angular.module('BBAdmin.Controllers').controller('AdminClients', function($scope, $rootScope, $q, AdminClientService, ClientDetailsService, AlertService) {
+  angular.module('BBAdmin.Controllers').controller('AdminClients', function($scope, $rootScope, $q, AdminClientService, ClientDetailsService, AlertService, $log) {
     $scope.clientDef = $q.defer();
     $scope.clientPromise = $scope.clientDef.promise;
     $scope.per_page = 15;
@@ -1394,7 +1394,6 @@
     $scope.clients = [];
     $scope.getClients = function(currentPage, filterBy, filterByFields, orderBy, orderByReverse) {
       var clientDef;
-      console.log(currentPage, filterBy, filterByFields, orderBy, orderByReverse);
       clientDef = $q.defer();
       $rootScope.connection_started.then(function() {
         $scope.notLoaded($scope);
@@ -1412,7 +1411,6 @@
             $scope.setLoaded($scope);
             $scope.setPageLoaded();
             $scope.total_entries = clients.total_entries;
-            console.log($scope.clients);
             return clientDef.resolve(clients.items);
           };
         })(this), function(err) {
@@ -1423,7 +1421,7 @@
       return true;
     };
     return $scope.edit = function(item) {
-      return console.log(item);
+      return $log.info("not implemented");
     };
   });
 
@@ -1516,7 +1514,9 @@
     ModalInstanceCtrl = function($scope, $modalInstance, items) {
       angular.extend($scope, items);
       $scope.ok = function() {
-        console.log("closeing", items, items.booking && items.booking.self ? items.booking.$update() : void 0);
+        if (items.booking && items.booking.self) {
+          items.booking.$update();
+        }
         return $modalInstance.close();
       };
       return $scope.cancel = function() {
@@ -1525,7 +1525,6 @@
     };
     return $scope.popupTimeAction = function(prms) {
       var modalInstance;
-      console.log(prms);
       return modalInstance = $modal.open({
         templateUrl: $scope.partial_url + 'time_popup',
         controller: ModalInstanceCtrl,
@@ -1745,7 +1744,6 @@ function SpaceMonitorCtrl($scope,  $location) {
 
 
   $scope.$on("Add_Space", function(event, message){
-     console.log("got new space", message)
      $scope.$apply();
    });
 
@@ -2009,7 +2007,6 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
     };
     link = function(scope, element, attrs) {
       var base, base1, loginModal, pickCompanyModal, tryLogin;
-      console.log('admin login link');
       $rootScope.bb || ($rootScope.bb = {});
       (base = $rootScope.bb).api_url || (base.api_url = scope.apiUrl);
       (base1 = $rootScope.bb).api_url || (base1.api_url = "http://www.bookingbug.com");
