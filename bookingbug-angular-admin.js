@@ -1674,7 +1674,8 @@
     $scope.login = {
       host: $sessionStorage.getItem('host'),
       email: null,
-      password: null
+      password: null,
+      selected_admin: null
     };
     $scope.login_template = 'admin_login.html';
     $scope.login = function() {
@@ -1701,19 +1702,19 @@
       });
     };
     $scope.pickCompany = function() {
-      return $scope.login_template = 'pick_company.html';
+      return $scope.login_template = 'admin_pick_company.html';
     };
     return $scope.selectedCompany = function() {
       var params;
       $scope.alert = "";
       params = {
-        email: $scope.email,
-        password: $scope.password
+        email: $scope.login.email,
+        password: $scope.login.password
       };
-      return $scope.selected_admin.$post('login', {}, params).then(function(login) {
-        return $scope.selected_admin.getCompanyPromise().then(function(company) {
+      return $scope.login.selected_admin.$post('login', {}, params).then(function(login) {
+        return $scope.login.selected_admin.getCompanyPromise().then(function(company) {
           $scope.bb.company = company;
-          AdminLoginService.setLogin($scope.selected_admin);
+          AdminLoginService.setLogin($scope.login.selected_admin);
           return $scope.onSuccess(company);
         });
       });
