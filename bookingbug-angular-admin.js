@@ -3148,6 +3148,31 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           return defer.reject(err);
         });
         return defer.promise;
+      },
+      setCompany: function(company_id) {
+        var defer, params, url;
+        defer = $q.defer();
+        url = $rootScope.bb.api_url + "/api/v1/login/admin";
+        params = {
+          company_id: company_id
+        };
+        halClient.$put(url, {}, params).then((function(_this) {
+          return function(login) {
+            if (login.$has('administrator')) {
+              return login.$get('administrator').then(function(user) {
+                user = _this.setLogin(user);
+                return defer.resolve(user);
+              }, function(err) {
+                return defer.reject(err);
+              });
+            } else {
+              return defer.reject();
+            }
+          };
+        })(this), function(err) {
+          return defer.reject(err);
+        });
+        return defer.promise;
       }
     };
   });
