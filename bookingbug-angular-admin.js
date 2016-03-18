@@ -2340,13 +2340,29 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         }
       }
 
+      Admin_Booking.prototype.useFullTime = function() {
+        this.using_full_time = true;
+        if (this.pre_time) {
+          this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
+        }
+        if (this.post_time) {
+          return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
+        }
+      };
+
       Admin_Booking.prototype.getPostData = function() {
         var data, q;
+        this.datetime = this.start.clone();
+        if (this.using_full_time) {
+          this.datetime.add(this.pre_time, 'minutes');
+        }
         data = {};
-        data.date = this.start.format("YYYY-MM-DD");
-        data.time = this.start.hour() * 60 + this.start.minute();
+        data.date = this.datetime.format("YYYY-MM-DD");
+        data.time = this.datetime.hour() * 60 + this.datetime.minute();
         data.duration = this.duration;
         data.id = this.id;
+        data.pre_time = this.pre_time;
+        data.post_time = this.post_time;
         data.person_id = this.person_id;
         if (this.questions) {
           data.questions = (function() {
@@ -2424,6 +2440,9 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return this.$put('self', {}, data).then((function(_this) {
           return function(res) {
             _this.constructor(res);
+            if (_this.using_full_time) {
+              _this.useFullTime();
+            }
             return BookingCollections.checkItems(_this);
           };
         })(this));
@@ -2434,6 +2453,9 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return this.$get('self').then((function(_this) {
           return function(res) {
             _this.constructor(res);
+            if (_this.using_full_time) {
+              _this.useFullTime();
+            }
             return BookingCollections.checkItems(_this);
           };
         })(this));
