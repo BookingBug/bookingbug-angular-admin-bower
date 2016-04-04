@@ -2864,6 +2864,9 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse}";
         uri = new UriTemplate(href).fillFromObject(prms || {});
         deferred = $q.defer();
+        if (prms.flush) {
+          halClient.clearCache(uri);
+        }
         halClient.$get(uri, {}).then((function(_this) {
           return function(resource) {
             var client;
