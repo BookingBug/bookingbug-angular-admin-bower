@@ -1674,8 +1674,7 @@
     $scope.login = {
       host: $sessionStorage.getItem('host'),
       email: null,
-      password: null,
-      selected_admin: null
+      password: null
     };
     $scope.login_template = 'admin_login.html';
     $scope.login = function() {
@@ -1702,19 +1701,19 @@
       });
     };
     $scope.pickCompany = function() {
-      return $scope.login_template = 'admin_pick_company.html';
+      return $scope.login_template = 'pick_company.html';
     };
     return $scope.selectedCompany = function() {
       var params;
       $scope.alert = "";
       params = {
-        email: $scope.login.email,
-        password: $scope.login.password
+        email: $scope.email,
+        password: $scope.password
       };
-      return $scope.login.selected_admin.$post('login', {}, params).then(function(login) {
-        return $scope.login.selected_admin.getCompanyPromise().then(function(company) {
+      return $scope.selected_admin.$post('login', {}, params).then(function(login) {
+        return $scope.selected_admin.getCompanyPromise().then(function(company) {
           $scope.bb.company = company;
-          AdminLoginService.setLogin($scope.login.selected_admin);
+          AdminLoginService.setLogin($scope.selected_admin);
           return $scope.onSuccess(company);
         });
       });
@@ -2122,45 +2121,6 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', function(AdminLoginService, QueryStringService, halClient) {
-    var link;
-    link = function(scope, element, attrs) {
-      var data, url;
-      scope.qs = QueryStringService;
-      data = {};
-      if (scope.token) {
-        data.token = scope.token;
-      }
-      if (scope.qs) {
-        data.token || (data.token = scope.qs('sso_token'));
-      }
-      url = scope.apiUrl + "/api/v1/login/admin_sso/" + scope.companyId;
-      return halClient.$post(url, {}, data).then(function(login) {
-        var params;
-        params = {
-          auth_token: login.auth_token
-        };
-        return login.$get('administrator', params).then(function(admin) {
-          scope.admin = admin;
-          return AdminLoginService.setLogin(admin);
-        });
-      });
-    };
-    return {
-      link: link,
-      scope: {
-        token: '@bbAdminSsoLogin',
-        companyId: '=',
-        apiUrl: '='
-      },
-      transclude: true,
-      template: "<div ng-if='admin' ng-transclude></div>"
-    };
-  });
-
-}).call(this);
-
-(function() {
   angular.module('BBAdmin').directive('bookingTable', function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
     var controller, link;
     controller = function($scope) {
@@ -2379,29 +2339,13 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         }
       }
 
-      Admin_Booking.prototype.useFullTime = function() {
-        this.using_full_time = true;
-        if (this.pre_time) {
-          this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
-        }
-        if (this.post_time) {
-          return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
-        }
-      };
-
       Admin_Booking.prototype.getPostData = function() {
         var data, q;
-        this.datetime = this.start.clone();
-        if (this.using_full_time) {
-          this.datetime.add(this.pre_time, 'minutes');
-        }
         data = {};
-        data.date = this.datetime.format("YYYY-MM-DD");
-        data.time = this.datetime.hour() * 60 + this.datetime.minute();
+        data.date = this.start.format("YYYY-MM-DD");
+        data.time = this.start.hour() * 60 + this.start.minute();
         data.duration = this.duration;
         data.id = this.id;
-        data.pre_time = this.pre_time;
-        data.post_time = this.post_time;
         data.person_id = this.person_id;
         if (this.questions) {
           data.questions = (function() {
@@ -2479,9 +2423,6 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return this.$put('self', {}, data).then((function(_this) {
           return function(res) {
             _this.constructor(res);
-            if (_this.using_full_time) {
-              _this.useFullTime();
-            }
             return BookingCollections.checkItems(_this);
           };
         })(this));
@@ -2492,9 +2433,6 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return this.$get('self').then((function(_this) {
           return function(res) {
             _this.constructor(res);
-            if (_this.using_full_time) {
-              _this.useFullTime();
-            }
             return BookingCollections.checkItems(_this);
           };
         })(this));
@@ -2864,9 +2802,6 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse}";
         uri = new UriTemplate(href).fillFromObject(prms || {});
         deferred = $q.defer();
-        if (prms.flush) {
-          halClient.clearCache(uri);
-        }
         halClient.$get(uri, {}).then((function(_this) {
           return function(resource) {
             var client;
@@ -3051,7 +2986,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory("AdminLoginService", function($q, halClient, $rootScope, BBModel, $sessionStorage, $cookies, UriTemplate, shared_header) {
+  angular.module('BBAdmin.Services').factory("AdminLoginService", function($q, halClient, $rootScope, BBModel, $sessionStorage, $cookies, UriTemplate) {
     return {
       login: function(form, options) {
         var deferred, url;
@@ -3186,46 +3121,16 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return defer.promise;
       },
       logout: function() {
-        var url;
-        url = $rootScope.bb.api_url + "/api/v1/login";
-        return halClient.$del(url)["finally"](function() {
-          $rootScope.user = null;
-          $sessionStorage.removeItem("user");
-          $sessionStorage.removeItem("auth_token");
-          $cookies['Auth-Token'] = null;
-          return shared_header.del('auth_token');
-        });
+        $rootScope.user = null;
+        $sessionStorage.removeItem("user");
+        $sessionStorage.removeItem("auth_token");
+        return $cookies['Auth-Token'] = null;
       },
       getLogin: function(options) {
         var defer, url;
         defer = $q.defer();
         url = $rootScope.bb.api_url + "/api/v1/login/admin/" + options.company_id;
         halClient.$get(url, options).then((function(_this) {
-          return function(login) {
-            if (login.$has('administrator')) {
-              return login.$get('administrator').then(function(user) {
-                user = _this.setLogin(user);
-                return defer.resolve(user);
-              }, function(err) {
-                return defer.reject(err);
-              });
-            } else {
-              return defer.reject();
-            }
-          };
-        })(this), function(err) {
-          return defer.reject(err);
-        });
-        return defer.promise;
-      },
-      setCompany: function(company_id) {
-        var defer, params, url;
-        defer = $q.defer();
-        url = $rootScope.bb.api_url + "/api/v1/login/admin";
-        params = {
-          company_id: company_id
-        };
-        halClient.$put(url, {}, params).then((function(_this) {
           return function(login) {
             if (login.$has('administrator')) {
               return login.$get('administrator').then(function(user) {
