@@ -1,5 +1,6 @@
 {
   "name": "bookingbug-angular-admin",
+  "version": "0.3.21",
   "homepage": "https://github.com/BookingBug/bookingbug-angular-admin-bower",
   "authors": [
     "Glenn Shoosmith <glenn@bookingbug.com>",
@@ -18,7 +19,6 @@
     "tests"
   ],
   "dependencies": {
-    "bookingbug-angular-core": "0.3.20"
-  },
-  "version": "0.3.20"
+    "bookingbug-angular-core": "0.3.21"
+  }
 }
