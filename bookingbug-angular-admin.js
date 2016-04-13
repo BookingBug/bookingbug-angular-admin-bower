@@ -2475,6 +2475,11 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       };
 
       Admin_Booking.prototype.$update = function(data) {
+        if (data) {
+          data.datetime = moment(data.datetime);
+          data.datetime.tz();
+          data.datetime = data.datetime.format();
+        }
         data || (data = this.getPostData());
         return this.$put('self', {}, data).then((function(_this) {
           return function(res) {
