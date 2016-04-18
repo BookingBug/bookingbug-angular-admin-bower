@@ -2122,39 +2122,42 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', function(AdminLoginService, QueryStringService, halClient) {
-    var link;
-    link = function(scope, element, attrs) {
-      var data, url;
-      scope.qs = QueryStringService;
-      data = {};
-      if (scope.token) {
-        data.token = scope.token;
-      }
-      if (scope.qs) {
-        data.token || (data.token = scope.qs('sso_token'));
-      }
-      url = scope.apiUrl + "/api/v1/login/admin_sso/" + scope.companyId;
-      return halClient.$post(url, {}, data).then(function(login) {
-        var params;
-        params = {
-          auth_token: login.auth_token
-        };
-        return login.$get('administrator', params).then(function(admin) {
-          scope.admin = admin;
-          return AdminLoginService.setLogin(admin);
-        });
-      });
-    };
+  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', function($rootScope, AdminLoginService, QueryStringService, halClient) {
     return {
-      link: link,
+      restrict: 'EA',
       scope: {
         token: '@bbAdminSsoLogin',
-        companyId: '=',
-        apiUrl: '='
+        companyId: '@',
+        apiUrl: '@'
       },
       transclude: true,
-      template: "<div ng-if='admin' ng-transclude></div>"
+      template: "<div ng-if='admin' ng-transclude></div>",
+      link: function(scope, element, attrs) {
+        var api_host, data, url;
+        scope.qs = QueryStringService;
+        data = {};
+        if (scope.token) {
+          data.token = scope.token;
+        }
+        if (scope.qs) {
+          data.token || (data.token = scope.qs('sso_token'));
+        }
+        if (scope.apiUrl) {
+          api_host = scope.apiUrl;
+        }
+        api_host || (api_host = $rootScope.bb.api_url);
+        url = api_host + "/api/v1/login/admin_sso/" + scope.companyId;
+        return halClient.$post(url, {}, data).then(function(login) {
+          var params;
+          params = {
+            auth_token: login.auth_token
+          };
+          return login.$get('administrator', params).then(function(admin) {
+            scope.admin = admin;
+            return AdminLoginService.setLogin(admin);
+          });
+        });
+      }
     };
   });
 
