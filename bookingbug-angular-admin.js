@@ -2136,11 +2136,11 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
         var api_host, data, url;
         scope.qs = QueryStringService;
         data = {};
-        if (scope.token) {
-          data.token = scope.token;
-        }
         if (scope.qs) {
-          data.token || (data.token = scope.qs('sso_token'));
+          data.token = scope.qs('sso_token');
+        }
+        if (scope.token) {
+          data.token || (data.token = scope.token);
         }
         if (scope.apiUrl) {
           api_host = scope.apiUrl;
