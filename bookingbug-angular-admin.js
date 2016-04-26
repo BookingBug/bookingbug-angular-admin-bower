@@ -2122,39 +2122,42 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', function(AdminLoginService, QueryStringService, halClient) {
-    var link;
-    link = function(scope, element, attrs) {
-      var data, url;
-      scope.qs = QueryStringService;
-      data = {};
-      if (scope.token) {
-        data.token = scope.token;
-      }
-      if (scope.qs) {
-        data.token || (data.token = scope.qs('sso_token'));
-      }
-      url = scope.apiUrl + "/api/v1/login/admin_sso/" + scope.companyId;
-      return halClient.$post(url, {}, data).then(function(login) {
-        var params;
-        params = {
-          auth_token: login.auth_token
-        };
-        return login.$get('administrator', params).then(function(admin) {
-          scope.admin = admin;
-          return AdminLoginService.setLogin(admin);
-        });
-      });
-    };
+  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', function($rootScope, AdminLoginService, QueryStringService, halClient) {
     return {
-      link: link,
+      restrict: 'EA',
       scope: {
         token: '@bbAdminSsoLogin',
-        companyId: '=',
-        apiUrl: '='
+        companyId: '@',
+        apiUrl: '@'
       },
       transclude: true,
-      template: "<div ng-if='admin' ng-transclude></div>"
+      template: "<div ng-if='admin' ng-transclude></div>",
+      link: function(scope, element, attrs) {
+        var api_host, data, url;
+        scope.qs = QueryStringService;
+        data = {};
+        if (scope.qs) {
+          data.token = scope.qs('sso_token');
+        }
+        if (scope.token) {
+          data.token || (data.token = scope.token);
+        }
+        if (scope.apiUrl) {
+          api_host = scope.apiUrl;
+        }
+        api_host || (api_host = $rootScope.bb.api_url);
+        url = api_host + "/api/v1/login/admin_sso/" + scope.companyId;
+        return halClient.$post(url, {}, data).then(function(login) {
+          var params;
+          params = {
+            auth_token: login.auth_token
+          };
+          return login.$get('administrator', params).then(function(admin) {
+            scope.admin = admin;
+            return AdminLoginService.setLogin(admin);
+          });
+        });
+      }
     };
   });
 
@@ -2350,242 +2353,6 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
     return function(v) {
       return $window.sprintf("%02d:%02d", Math.floor(v / 60), v % 60);
     };
-  });
-
-}).call(this);
-
-(function() {
-  'use strict';
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  angular.module('BB.Models').factory("Admin.BookingModel", function($q, BBModel, BaseModel, BookingCollections) {
-    var Admin_Booking;
-    return Admin_Booking = (function(superClass) {
-      extend(Admin_Booking, superClass);
-
-      function Admin_Booking(data) {
-        Admin_Booking.__super__.constructor.apply(this, arguments);
-        this.datetime = moment(this.datetime);
-        this.start = this.datetime;
-        this.end = this.datetime.clone().add(this.duration, 'minutes');
-        this.title = this.full_describe;
-        this.time = this.start.hour() * 60 + this.start.minute();
-        this.allDay = false;
-        if (this.status === 3) {
-          this.className = "status_blocked";
-        } else if (this.status === 4) {
-          this.className = "status_booked";
-        }
-      }
-
-      Admin_Booking.prototype.useFullTime = function() {
-        this.using_full_time = true;
-        if (this.pre_time) {
-          this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
-        }
-        if (this.post_time) {
-          return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
-        }
-      };
-
-      Admin_Booking.prototype.getPostData = function() {
-        var data, q;
-        this.datetime = this.start.clone();
-        if (this.using_full_time) {
-          this.datetime.add(this.pre_time, 'minutes');
-        }
-        data = {};
-        data.date = this.datetime.format("YYYY-MM-DD");
-        data.time = this.datetime.hour() * 60 + this.datetime.minute();
-        data.duration = this.duration;
-        data.id = this.id;
-        data.pre_time = this.pre_time;
-        data.post_time = this.post_time;
-        data.person_id = this.person_id;
-        if (this.questions) {
-          data.questions = (function() {
-            var i, len, ref, results;
-            ref = this.questions;
-            results = [];
-            for (i = 0, len = ref.length; i < len; i++) {
-              q = ref[i];
-              results.push(q.getPostData());
-            }
-            return results;
-          }).call(this);
-        }
-        return data;
-      };
-
-      Admin_Booking.prototype.hasStatus = function(status) {
-        return this.multi_status[status] != null;
-      };
-
-      Admin_Booking.prototype.statusTime = function(status) {
-        if (this.multi_status[status]) {
-          return moment(this.multi_status[status]);
-        } else {
-          return null;
-        }
-      };
-
-      Admin_Booking.prototype.sinceStatus = function(status) {
-        var s;
-        s = this.statusTime(status);
-        if (!s) {
-          return 0;
-        }
-        return Math.floor((moment().unix() - s.unix()) / 60);
-      };
-
-      Admin_Booking.prototype.sinceStart = function(options) {
-        var s, start;
-        start = this.datetime.unix();
-        if (!options) {
-          return Math.floor((moment().unix() - start) / 60);
-        }
-        if (options.later) {
-          s = this.statusTime(options.later).unix();
-          if (s > start) {
-            return Math.floor((moment().unix() - s) / 60);
-          }
-        }
-        if (options.earlier) {
-          s = this.statusTime(options.earlier).unix();
-          if (s < start) {
-            return Math.floor((moment().unix() - s) / 60);
-          }
-        }
-        return Math.floor((moment().unix() - start) / 60);
-      };
-
-      Admin_Booking.prototype.answer = function(q) {
-        var a, i, len, ref;
-        if (this.answers_summary) {
-          ref = this.answers_summary;
-          for (i = 0, len = ref.length; i < len; i++) {
-            a = ref[i];
-            if (a.name === q) {
-              return a.answer;
-            }
-          }
-        }
-        return null;
-      };
-
-      Admin_Booking.prototype.$update = function(data) {
-        if (data) {
-          data.datetime = moment(data.datetime);
-          data.datetime.tz();
-          data.datetime = data.datetime.format();
-        }
-        data || (data = this.getPostData());
-        return this.$put('self', {}, data).then((function(_this) {
-          return function(res) {
-            _this.constructor(res);
-            if (_this.using_full_time) {
-              _this.useFullTime();
-            }
-            return BookingCollections.checkItems(_this);
-          };
-        })(this));
-      };
-
-      Admin_Booking.prototype.$refetch = function() {
-        this.$flush('self');
-        return this.$get('self').then((function(_this) {
-          return function(res) {
-            _this.constructor(res);
-            if (_this.using_full_time) {
-              _this.useFullTime();
-            }
-            return BookingCollections.checkItems(_this);
-          };
-        })(this));
-      };
-
-      return Admin_Booking;
-
-    })(BaseModel);
-  });
-
-}).call(this);
-
-(function() {
-  'use strict';
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  angular.module('BB.Models').factory("Admin.LoginModel", function($q, BBModel, BaseModel) {
-    var Admin_Login;
-    return Admin_Login = (function(superClass) {
-      extend(Admin_Login, superClass);
-
-      function Admin_Login(data) {
-        Admin_Login.__super__.constructor.call(this, data);
-      }
-
-      return Admin_Login;
-
-    })(BaseModel);
-  });
-
-}).call(this);
-
-(function() {
-  'use strict';
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  angular.module('BB.Models').factory("Admin.SlotModel", function($q, BBModel, BaseModel, TimeSlotModel) {
-    var Admin_Slot;
-    return Admin_Slot = (function(superClass) {
-      extend(Admin_Slot, superClass);
-
-      function Admin_Slot(data) {
-        Admin_Slot.__super__.constructor.call(this, data);
-        this.title = this.full_describe;
-        if (this.status === 0) {
-          this.title = "Available";
-        }
-        this.datetime = moment(this.datetime);
-        this.start = this.datetime;
-        this.end = this.datetime.clone().add(this.duration, 'minutes');
-        this.time = this.start.hour() * 60 + this.start.minute();
-        this.allDay = false;
-        if (this.status === 3) {
-          this.className = "status_blocked";
-        } else if (this.status === 4) {
-          this.className = "status_booked";
-        } else if (this.status === 0) {
-          this.className = "status_available";
-        }
-      }
-
-      return Admin_Slot;
-
-    })(TimeSlotModel);
-  });
-
-}).call(this);
-
-(function() {
-  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  angular.module('BB.Models').factory("Admin.UserModel", function($q, BBModel, BaseModel) {
-    var User;
-    return User = (function(superClass) {
-      extend(User, superClass);
-
-      function User() {
-        return User.__super__.constructor.apply(this, arguments);
-      }
-
-      return User;
-
-    })(BaseModel);
   });
 
 }).call(this);
@@ -3503,6 +3270,242 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return new BBModel.Admin.Login(resource);
       }
     };
+  });
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("Admin.BookingModel", function($q, BBModel, BaseModel, BookingCollections) {
+    var Admin_Booking;
+    return Admin_Booking = (function(superClass) {
+      extend(Admin_Booking, superClass);
+
+      function Admin_Booking(data) {
+        Admin_Booking.__super__.constructor.apply(this, arguments);
+        this.datetime = moment(this.datetime);
+        this.start = this.datetime;
+        this.end = this.datetime.clone().add(this.duration, 'minutes');
+        this.title = this.full_describe;
+        this.time = this.start.hour() * 60 + this.start.minute();
+        this.allDay = false;
+        if (this.status === 3) {
+          this.className = "status_blocked";
+        } else if (this.status === 4) {
+          this.className = "status_booked";
+        }
+      }
+
+      Admin_Booking.prototype.useFullTime = function() {
+        this.using_full_time = true;
+        if (this.pre_time) {
+          this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
+        }
+        if (this.post_time) {
+          return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
+        }
+      };
+
+      Admin_Booking.prototype.getPostData = function() {
+        var data, q;
+        this.datetime = this.start.clone();
+        if (this.using_full_time) {
+          this.datetime.add(this.pre_time, 'minutes');
+        }
+        data = {};
+        data.date = this.datetime.format("YYYY-MM-DD");
+        data.time = this.datetime.hour() * 60 + this.datetime.minute();
+        data.duration = this.duration;
+        data.id = this.id;
+        data.pre_time = this.pre_time;
+        data.post_time = this.post_time;
+        data.person_id = this.person_id;
+        if (this.questions) {
+          data.questions = (function() {
+            var i, len, ref, results;
+            ref = this.questions;
+            results = [];
+            for (i = 0, len = ref.length; i < len; i++) {
+              q = ref[i];
+              results.push(q.getPostData());
+            }
+            return results;
+          }).call(this);
+        }
+        return data;
+      };
+
+      Admin_Booking.prototype.hasStatus = function(status) {
+        return this.multi_status[status] != null;
+      };
+
+      Admin_Booking.prototype.statusTime = function(status) {
+        if (this.multi_status[status]) {
+          return moment(this.multi_status[status]);
+        } else {
+          return null;
+        }
+      };
+
+      Admin_Booking.prototype.sinceStatus = function(status) {
+        var s;
+        s = this.statusTime(status);
+        if (!s) {
+          return 0;
+        }
+        return Math.floor((moment().unix() - s.unix()) / 60);
+      };
+
+      Admin_Booking.prototype.sinceStart = function(options) {
+        var s, start;
+        start = this.datetime.unix();
+        if (!options) {
+          return Math.floor((moment().unix() - start) / 60);
+        }
+        if (options.later) {
+          s = this.statusTime(options.later).unix();
+          if (s > start) {
+            return Math.floor((moment().unix() - s) / 60);
+          }
+        }
+        if (options.earlier) {
+          s = this.statusTime(options.earlier).unix();
+          if (s < start) {
+            return Math.floor((moment().unix() - s) / 60);
+          }
+        }
+        return Math.floor((moment().unix() - start) / 60);
+      };
+
+      Admin_Booking.prototype.answer = function(q) {
+        var a, i, len, ref;
+        if (this.answers_summary) {
+          ref = this.answers_summary;
+          for (i = 0, len = ref.length; i < len; i++) {
+            a = ref[i];
+            if (a.name === q) {
+              return a.answer;
+            }
+          }
+        }
+        return null;
+      };
+
+      Admin_Booking.prototype.$update = function(data) {
+        if (data) {
+          data.datetime = moment(data.datetime);
+          data.datetime.tz();
+          data.datetime = data.datetime.format();
+        }
+        data || (data = this.getPostData());
+        return this.$put('self', {}, data).then((function(_this) {
+          return function(res) {
+            _this.constructor(res);
+            if (_this.using_full_time) {
+              _this.useFullTime();
+            }
+            return BookingCollections.checkItems(_this);
+          };
+        })(this));
+      };
+
+      Admin_Booking.prototype.$refetch = function() {
+        this.$flush('self');
+        return this.$get('self').then((function(_this) {
+          return function(res) {
+            _this.constructor(res);
+            if (_this.using_full_time) {
+              _this.useFullTime();
+            }
+            return BookingCollections.checkItems(_this);
+          };
+        })(this));
+      };
+
+      return Admin_Booking;
+
+    })(BaseModel);
+  });
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("Admin.LoginModel", function($q, BBModel, BaseModel) {
+    var Admin_Login;
+    return Admin_Login = (function(superClass) {
+      extend(Admin_Login, superClass);
+
+      function Admin_Login(data) {
+        Admin_Login.__super__.constructor.call(this, data);
+      }
+
+      return Admin_Login;
+
+    })(BaseModel);
+  });
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("Admin.SlotModel", function($q, BBModel, BaseModel, TimeSlotModel) {
+    var Admin_Slot;
+    return Admin_Slot = (function(superClass) {
+      extend(Admin_Slot, superClass);
+
+      function Admin_Slot(data) {
+        Admin_Slot.__super__.constructor.call(this, data);
+        this.title = this.full_describe;
+        if (this.status === 0) {
+          this.title = "Available";
+        }
+        this.datetime = moment(this.datetime);
+        this.start = this.datetime;
+        this.end = this.datetime.clone().add(this.duration, 'minutes');
+        this.time = this.start.hour() * 60 + this.start.minute();
+        this.allDay = false;
+        if (this.status === 3) {
+          this.className = "status_blocked";
+        } else if (this.status === 4) {
+          this.className = "status_booked";
+        } else if (this.status === 0) {
+          this.className = "status_available";
+        }
+      }
+
+      return Admin_Slot;
+
+    })(TimeSlotModel);
+  });
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("Admin.UserModel", function($q, BBModel, BaseModel) {
+    var User;
+    return User = (function(superClass) {
+      extend(User, superClass);
+
+      function User() {
+        return User.__super__.constructor.apply(this, arguments);
+      }
+
+      return User;
+
+    })(BaseModel);
   });
 
 }).call(this);
