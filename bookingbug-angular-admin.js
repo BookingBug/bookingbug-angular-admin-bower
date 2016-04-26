@@ -2382,9 +2382,15 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         }
         deferred = $q.defer();
         existing = BookingCollections.find(prms);
-        if (existing) {
+        if (existing && !prms.skip_cache) {
           deferred.resolve(existing);
         } else if (company) {
+          if (prms.skip_cache) {
+            if (existing) {
+              BookingCollections["delete"](existing);
+            }
+            company.$flush('bookings', prms);
+          }
           company.$get('bookings', prms).then(function(collection) {
             return collection.$get('bookings').then(function(bookings) {
               var b, models, spaces;
@@ -2411,7 +2417,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           if (prms.url) {
             url = prms.url;
           }
-          href = url + "/api/v1/admin/{company_id}/bookings{?slot_id,start_date,end_date,service_id,resource_id,person_id,page,per_page,include_cancelled}";
+          href = url + "/api/v1/admin/{company_id}/bookings{?slot_id,start_date,end_date,service_id,resource_id,person_id,page,per_page,include_cancelled,embed}";
           uri = new UriTemplate(href).fillFromObject(prms || {});
           halClient.$get(uri, {}).then((function(_this) {
             return function(found) {
