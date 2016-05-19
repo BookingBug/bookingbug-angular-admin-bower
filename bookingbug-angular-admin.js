@@ -2875,7 +2875,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         if ($rootScope.bb.api_url) {
           url = $rootScope.bb.api_url;
         }
-        href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse}";
+        href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields}";
         uri = new UriTemplate(href).fillFromObject(prms || {});
         deferred = $q.defer();
         if (prms.flush) {
@@ -2886,12 +2886,16 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
             var client;
             if (resource.$has('clients')) {
               return resource.$get('clients').then(function(items) {
-                var clients, i, j, len, people;
-                people = [];
-                for (j = 0, len = items.length; j < len; j++) {
-                  i = items[j];
-                  people.push(new BBModel.Client(i));
-                }
+                var clients, i, people;
+                people = (function() {
+                  var j, len, results;
+                  results = [];
+                  for (j = 0, len = items.length; j < len; j++) {
+                    i = items[j];
+                    results.push(new BBModel.Client(i));
+                  }
+                  return results;
+                })();
                 clients = new $window.Collection.Client(resource, people, prms);
                 clients.total_entries = resource.total_entries;
                 ClientCollections.add(clients);
