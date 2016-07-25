@@ -2664,7 +2664,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           if (prms.url) {
             url = prms.url;
           }
-          href = url + "/api/v1/admin/{company_id}/bookings{?slot_id,start_date,end_date,service_id,resource_id,person_id,page,per_page,include_cancelled,embed,client_id}";
+          href = url + "/api/v1/admin/{company_id}/bookings{?slot_id,start_date,end_date,service_id,resource_id,person_id,page,per_page,include_cancelled,embed}";
           uri = new UriTemplate(href).fillFromObject(prms || {});
           halClient.$get(uri, {}).then((function(_this) {
             return function(found) {
