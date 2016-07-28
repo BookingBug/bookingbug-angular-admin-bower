@@ -4,9 +4,9 @@
 
   adminapp = angular.module('BBAdmin', ['BB', 'BBAdmin.Services', 'BBAdmin.Filters', 'BBAdmin.Directives', 'BBAdmin.Controllers', 'trNgGrid']);
 
-  angular.module('BBAdmin').config(function($logProvider) {
+  angular.module('BBAdmin').config(["$logProvider", function($logProvider) {
     return $logProvider.debugEnabled(true);
-  });
+  }]);
 
   angular.module('BBAdmin.Directives', []);
 
@@ -16,14 +16,14 @@
 
   angular.module('BBAdmin.Controllers', ['ngLocalData', 'ngSanitize']);
 
-  adminapp.run(function($rootScope, $log, DebugUtilsService, FormDataStoreService, $bbug, $document, $sessionStorage, AppConfig, AdminLoginService) {
+  adminapp.run(["$rootScope", "$log", "DebugUtilsService", "FormDataStoreService", "$bbug", "$document", "$sessionStorage", "AppConfig", "AdminLoginService", function($rootScope, $log, DebugUtilsService, FormDataStoreService, $bbug, $document, $sessionStorage, AppConfig, AdminLoginService) {
     return AdminLoginService.checkLogin().then(function() {
       if ($rootScope.user && $rootScope.user.company_id) {
         $rootScope.bb || ($rootScope.bb = {});
         return $rootScope.bb.company_id = $rootScope.user.company_id;
       }
     });
-  });
+  }]);
 
 }).call(this);
 
@@ -31,7 +31,7 @@
   'use strict';
   angular.module('BBAdminMockE2E', ['BBAdmin', 'ngMockE2E']);
 
-  angular.module('BBAdminMockE2E').run(function($httpBackend) {
+  angular.module('BBAdminMockE2E').run(["$httpBackend", function($httpBackend) {
     var admin_schema, administrators, company, event_chain_schema, event_chains, member_bookings, member_schema, people, person_schema, queuer_schema, queuers, schedule1, schedule_schema, schedules, service_schema, services;
     $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/login/admin/123').respond(function(method, url, data) {
       var login;
@@ -1087,7 +1087,7 @@
     return $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/queuers/edit').respond(function() {
       return [200, queuer_schema, {}];
     });
-  });
+  }]);
 
 }).call(this);
 
@@ -1219,7 +1219,7 @@
 
 (function() {
   'use strict';
-  angular.module('BBAdmin.Controllers').controller('CalendarCtrl', function($scope, AdminBookingService, $rootScope) {
+  angular.module('BBAdmin.Controllers').controller('CalendarCtrl', ["$scope", "AdminBookingService", "$rootScope", function($scope, AdminBookingService, $rootScope) {
 
     /* event source that pulls from google.com
     $scope.eventSource = {
@@ -1344,12 +1344,12 @@
       }
     };
     return $scope.eventSources = [$scope.eventsF];
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('CategoryList', function($scope, $location, CategoryService, $rootScope) {
+  angular.module('BBAdmin.Controllers').controller('CategoryList', ["$scope", "$location", "CategoryService", "$rootScope", function($scope, $location, CategoryService, $rootScope) {
     $rootScope.connection_started.then((function(_this) {
       return function() {
         $scope.categories = CategoryService.query($scope.bb.company);
@@ -1370,7 +1370,7 @@
         return $scope.$apply();
       };
     })(this));
-  });
+  }]);
 
 }).call(this);
 
@@ -1386,7 +1386,7 @@
     };
   });
 
-  angular.module('BBAdmin.Controllers').controller('AdminClients', function($scope, $rootScope, $q, AdminClientService, ClientDetailsService, AlertService, $log) {
+  angular.module('BBAdmin.Controllers').controller('AdminClients', ["$scope", "$rootScope", "$q", "AdminClientService", "ClientDetailsService", "AlertService", "$log", function($scope, $rootScope, $q, AdminClientService, ClientDetailsService, AlertService, $log) {
     $scope.clientDef = $q.defer();
     $scope.clientPromise = $scope.clientDef.promise;
     $scope.per_page = 15;
@@ -1423,12 +1423,12 @@
     return $scope.edit = function(item) {
       return $log.info("not implemented");
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('CompanyList', function($scope, $rootScope, $location) {
+  angular.module('BBAdmin.Controllers').controller('CompanyList', ["$scope", "$rootScope", "$location", function($scope, $rootScope, $location) {
     $scope.selectedCategory = null;
     $rootScope.connection_started.then((function(_this) {
       return function() {
@@ -1471,12 +1471,12 @@
     return $scope.$on("Refresh_Comp", function(event, message) {
       return $scope.$apply();
     });
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('DashboardContainer', function($scope, $rootScope, $location, $modal) {
+  angular.module('BBAdmin.Controllers').controller('DashboardContainer', ["$scope", "$rootScope", "$location", "$modal", function($scope, $rootScope, $location, $modal) {
     var ModalInstanceCtrl;
     $scope.selectedBooking = null;
     $scope.poppedBooking = null;
@@ -1539,13 +1539,13 @@
         }
       });
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
   'use strict';
-  angular.module('BBAdmin.Controllers').controller('DashDayList', function($scope, $rootScope, $q, AdminDayService) {
+  angular.module('BBAdmin.Controllers').controller('DashDayList', ["$scope", "$rootScope", "$q", "AdminDayService", function($scope, $rootScope, $q, AdminDayService) {
     $scope.init = (function(_this) {
       return function(company_id) {
         var date, dayListDef, prms, weekListDef;
@@ -1645,12 +1645,12 @@
         }
       };
     })(this));
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('EditBookingDetails', function($scope, $location, $rootScope) {});
+  angular.module('BBAdmin.Controllers').controller('EditBookingDetails', ["$scope", "$location", "$rootScope", function($scope, $location, $rootScope) {}]);
 
 }).call(this);
 
@@ -1670,7 +1670,7 @@
     };
   });
 
-  angular.module('BBAdmin.Controllers').controller('AdminLogin', function($scope, $rootScope, AdminLoginService, $q, $sessionStorage) {
+  angular.module('BBAdmin.Controllers').controller('AdminLogin', ["$scope", "$rootScope", "AdminLoginService", "$q", "$sessionStorage", function($scope, $rootScope, AdminLoginService, $q, $sessionStorage) {
     $scope.login = {
       host: $sessionStorage.getItem('host'),
       email: null,
@@ -1719,12 +1719,12 @@
         });
       });
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('SelectedBookingDetails', function($scope, $location, AdminBookingService, $rootScope) {
+  angular.module('BBAdmin.Controllers').controller('SelectedBookingDetails', ["$scope", "$location", "AdminBookingService", "$rootScope", function($scope, $location, AdminBookingService, $rootScope) {
     return $scope.$watch('selectedBooking', (function(_this) {
       return function(newValue, oldValue) {
         if (newValue) {
@@ -1733,7 +1733,7 @@
         }
       };
     })(this));
-  });
+  }]);
 
 }).call(this);
 
@@ -1757,7 +1757,7 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 
 (function() {
   'use strict';
-  angular.module('BBAdmin.Controllers').controller('DashTimeList', function($scope, $rootScope, $location, $q, $element, AdminTimeService) {
+  angular.module('BBAdmin.Controllers').controller('DashTimeList', ["$scope", "$rootScope", "$location", "$q", "$element", "AdminTimeService", function($scope, $rootScope, $location, $q, $element, AdminTimeService) {
     var $loaded;
     $loaded = null;
     $scope.init = (function(_this) {
@@ -1862,7 +1862,7 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
         });
       };
     })(this);
-  });
+  }]);
 
 
   /*
@@ -1886,7 +1886,7 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('TimeOptions', function($scope, $location, $rootScope, AdminResourceService, AdminPersonService) {
+  angular.module('BBAdmin.Controllers').controller('TimeOptions', ["$scope", "$location", "$rootScope", "AdminResourceService", "AdminPersonService", function($scope, $location, $rootScope, AdminResourceService, AdminPersonService) {
     AdminResourceService.query({
       company: $scope.bb.company
     }).then(function(resources) {
@@ -1906,12 +1906,12 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
       }
       return $scope.ok();
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Directives').directive('adminLogin', function($modal, $log, $rootScope, AdminLoginService, $templateCache, $q) {
+  angular.module('BBAdmin.Directives').directive('adminLogin', ["$modal", "$log", "$rootScope", "AdminLoginService", "$templateCache", "$q", function($modal, $log, $rootScope, AdminLoginService, $templateCache, $q) {
     var link, loginAdminController, pickCompanyController;
     loginAdminController = function($scope, $modalInstance, company_id) {
       $scope.title = 'Login';
@@ -2117,12 +2117,12 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
       transclude: true,
       template: "<div ng-hide='admin'><img src='/BB_wait.gif' class=\"loader\"></div>\n<div ng-show='admin' ng-transclude></div>"
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', function($rootScope, AdminLoginService, QueryStringService, halClient) {
+  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', ["$rootScope", "AdminLoginService", "QueryStringService", "halClient", function($rootScope, AdminLoginService, QueryStringService, halClient) {
     return {
       restrict: 'EA',
       scope: {
@@ -2159,12 +2159,12 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
         });
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin').directive('bookingTable', function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
+  angular.module('BBAdmin').directive('bookingTable', ["AdminCompanyService", "AdminBookingService", "$modal", "$log", "ModalForm", function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
     var controller, link;
     controller = function($scope) {
       $scope.fields = ['id', 'datetime'];
@@ -2210,13 +2210,13 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
       link: link,
       templateUrl: 'booking_table_main.html'
     };
-  });
+  }]);
 
 }).call(this);
 
 
 
-angular.module('BBAdmin.Directives').controller('CalController', function($scope) {
+angular.module('BBAdmin.Directives').controller('CalController', ["$scope", function($scope) {
     /* config object */
     $scope.calendarConfig = {
         height: 450,
@@ -2225,16 +2225,16 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
             scope.$apply($scope.alertEventOnClick);
         }
     };
-});
+}]);
 
 (function() {
   'use strict';
-  angular.module('BBAdmin.Directives').directive('bbPeopleList', function($rootScope) {
+  angular.module('BBAdmin.Directives').directive('bbPeopleList', ["$rootScope", function($rootScope) {
     return {
       restrict: 'AE',
       replace: true,
       scope: true,
-      controller: function($scope, $rootScope, PersonService, $q, BBModel, PersonModel) {
+      controller: ["$scope", "$rootScope", "PersonService", "$q", "BBModel", "PersonModel", function($scope, $rootScope, PersonService, $q, BBModel, PersonModel) {
         $rootScope.connection_started.then(function() {
           return $scope.bb.company.getPeoplePromise().then(function(people) {
             var i, len, person, results;
@@ -2267,10 +2267,10 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           }
           return results;
         };
-      },
+      }],
       link: function(scope, element, attrs) {}
     };
-  });
+  }]);
 
   angular.module('BBAdmin.Directives').directive('bbBookingList', function() {
     return {
@@ -2284,7 +2284,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       templateUrl: function(tElm, tAttrs) {
         return tAttrs.template;
       },
-      controller: function($scope, $filter) {
+      controller: ["$scope", "$filter", function($scope, $filter) {
         var status;
         $scope.title = $scope.params.title;
         status = $scope.params.status;
@@ -2313,7 +2313,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           }
           return $scope.relevantBookings != null ? $scope.relevantBookings : $scope.relevantBookings = [];
         });
-      }
+      }]
     };
   });
 
@@ -2349,11 +2349,11 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
     };
   });
 
-  bbAdminFilters.filter('time', function($window) {
+  bbAdminFilters.filter('time', ["$window", function($window) {
     return function(v) {
       return $window.sprintf("%02d:%02d", Math.floor(v / 60), v % 60);
     };
-  });
+  }]);
 
 }).call(this);
 
@@ -2362,7 +2362,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.BookingModel", function($q, BBModel, BaseModel, BookingCollections) {
+  angular.module('BB.Models').factory("Admin.BookingModel", ["$q", "BBModel", "BaseModel", "BookingCollections", function($q, BBModel, BaseModel, BookingCollections) {
     var Admin_Booking;
     return Admin_Booking = (function(superClass) {
       extend(Admin_Booking, superClass);
@@ -2522,7 +2522,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       return Admin_Booking;
 
     })(BaseModel);
-  });
+  }]);
 
 }).call(this);
 
@@ -2531,7 +2531,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.LoginModel", function($q, BBModel, BaseModel) {
+  angular.module('BB.Models').factory("Admin.LoginModel", ["$q", "BBModel", "BaseModel", function($q, BBModel, BaseModel) {
     var Admin_Login;
     return Admin_Login = (function(superClass) {
       extend(Admin_Login, superClass);
@@ -2543,7 +2543,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       return Admin_Login;
 
     })(BaseModel);
-  });
+  }]);
 
 }).call(this);
 
@@ -2552,7 +2552,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.SlotModel", function($q, BBModel, BaseModel, TimeSlotModel) {
+  angular.module('BB.Models').factory("Admin.SlotModel", ["$q", "BBModel", "BaseModel", "TimeSlotModel", function($q, BBModel, BaseModel, TimeSlotModel) {
     var Admin_Slot;
     return Admin_Slot = (function(superClass) {
       extend(Admin_Slot, superClass);
@@ -2580,7 +2580,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       return Admin_Slot;
 
     })(TimeSlotModel);
-  });
+  }]);
 
 }).call(this);
 
@@ -2588,7 +2588,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.UserModel", function($q, BBModel, BaseModel) {
+  angular.module('BB.Models').factory("Admin.UserModel", ["$q", "BBModel", "BaseModel", function($q, BBModel, BaseModel) {
     var User;
     return User = (function(superClass) {
       extend(User, superClass);
@@ -2600,12 +2600,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
       return User;
 
     })(BaseModel);
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminBookingService', function($q, $window, halClient, BookingCollections, BBModel, UriTemplate) {
+  angular.module('BBAdmin.Services').factory('AdminBookingService', ["$q", "$window", "halClient", "BookingCollections", "BBModel", "UriTemplate", function($q, $window, halClient, BookingCollections, BBModel, UriTemplate) {
     return {
       query: function(prms) {
         var company, deferred, existing, href, uri, url;
@@ -2874,12 +2874,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return deferred.promise;
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminClientService', function($q, $window, $rootScope, halClient, ClientCollections, BBModel, UriTemplate) {
+  angular.module('BBAdmin.Services').factory('AdminClientService', ["$q", "$window", "$rootScope", "halClient", "ClientCollections", "BBModel", "UriTemplate", function($q, $window, $rootScope, halClient, ClientCollections, BBModel, UriTemplate) {
     return {
       query: function(prms) {
         var deferred, href, uri, url;
@@ -2943,7 +2943,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return deferred.promise;
       }
     };
-  });
+  }]);
 
 }).call(this);
 
@@ -2989,7 +2989,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminCompanyService', function($q, BBModel, AdminLoginService, $rootScope, $sessionStorage) {
+  angular.module('BBAdmin.Services').factory('AdminCompanyService', ["$q", "BBModel", "AdminLoginService", "$rootScope", "$sessionStorage", function($q, BBModel, AdminLoginService, $rootScope, $sessionStorage) {
     return {
       query: function(params) {
         var base, base1, base2, defer;
@@ -3030,12 +3030,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return defer.promise;
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminDayService', function($q, $window, halClient, BBModel, UriTemplate) {
+  angular.module('BBAdmin.Services').factory('AdminDayService', ["$q", "$window", "halClient", "BBModel", "UriTemplate", function($q, $window, halClient, BBModel, UriTemplate) {
     return {
       query: function(prms) {
         var deferred, href, uri, url;
@@ -3079,12 +3079,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return deferred.promise;
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory("AdminLoginService", function($q, halClient, $rootScope, BBModel, $sessionStorage, $cookies, UriTemplate, shared_header) {
+  angular.module('BBAdmin.Services').factory("AdminLoginService", ["$q", "halClient", "$rootScope", "BBModel", "$sessionStorage", "$cookies", "UriTemplate", "shared_header", function($q, halClient, $rootScope, BBModel, $sessionStorage, $cookies, UriTemplate, shared_header) {
     return {
       login: function(form, options) {
         var deferred, url;
@@ -3277,12 +3277,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return defer.promise;
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminPurchaseService', function($q, halClient, BBModel) {
+  angular.module('BBAdmin.Services').factory('AdminPurchaseService', ["$q", "halClient", "BBModel", function($q, halClient, BBModel) {
     return {
       query: function(params) {
         var defer, uri;
@@ -3341,12 +3341,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return defer.promise;
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminSlotService', function($q, $window, halClient, SlotCollections, BBModel, UriTemplate) {
+  angular.module('BBAdmin.Services').factory('AdminSlotService', ["$q", "$window", "halClient", "SlotCollections", "BBModel", "UriTemplate", function($q, $window, halClient, SlotCollections, BBModel, UriTemplate) {
     return {
       query: function(prms) {
         var deferred, existing, href, uri, url;
@@ -3458,12 +3458,12 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return deferred.promise;
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminTimeService', function($q, $window, halClient, BBModel, UriTemplate) {
+  angular.module('BBAdmin.Services').factory('AdminTimeService', ["$q", "$window", "halClient", "BBModel", "UriTemplate", function($q, $window, halClient, BBModel, UriTemplate) {
     return {
       query: function(prms) {
         var deferred, href, uri, url;
@@ -3512,25 +3512,25 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return deferred.promise;
       }
     };
-  });
+  }]);
 
 }).call(this);
 
 (function() {
-  angular.module('BB.Services').factory("BB.Service.login", function($q, BBModel) {
+  angular.module('BB.Services').factory("BB.Service.login", ["$q", "BBModel", function($q, BBModel) {
     return {
       unwrap: function(resource) {
         return new BBModel.Admin.Login(resource);
       }
     };
-  });
+  }]);
 
-  angular.module('BB.Services').factory("BB.Service.base_login", function($q, BBModel) {
+  angular.module('BB.Services').factory("BB.Service.base_login", ["$q", "BBModel", function($q, BBModel) {
     return {
       unwrap: function(resource) {
         return new BBModel.Admin.Login(resource);
       }
     };
-  });
+  }]);
 
 }).call(this);
