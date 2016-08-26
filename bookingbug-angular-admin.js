@@ -1,8 +1,6 @@
 (function() {
   'use strict';
-  var adminapp;
-
-  adminapp = angular.module('BBAdmin', ['BB', 'BBAdmin.Services', 'BBAdmin.Filters', 'BBAdmin.Directives', 'BBAdmin.Controllers', 'trNgGrid']);
+  angular.module('BBAdmin', ['BB', 'BBAdmin.Services', 'BBAdmin.Filters', 'BBAdmin.Directives', 'BBAdmin.Controllers', 'BBAdmin.Models', 'BBAdmin.Directives', 'trNgGrid']);
 
   angular.module('BBAdmin').config(["$logProvider", function($logProvider) {
     return $logProvider.debugEnabled(true);
@@ -12,1086 +10,27 @@
 
   angular.module('BBAdmin.Filters', []);
 
-  angular.module('BBAdmin.Services', ['ngResource', 'ngSanitize', 'ngLocalData']);
+  angular.module('BBAdmin.Models', []);
 
-  angular.module('BBAdmin.Controllers', ['ngLocalData', 'ngSanitize']);
+  angular.module('BBAdmin.Services', ['ngResource', 'ngSanitize']);
 
-  adminapp.run(["$rootScope", "$log", "DebugUtilsService", "FormDataStoreService", "$bbug", "$document", "$sessionStorage", "AppConfig", "AdminLoginService", function($rootScope, $log, DebugUtilsService, FormDataStoreService, $bbug, $document, $sessionStorage, AppConfig, AdminLoginService) {
-    return AdminLoginService.checkLogin().then(function() {
-      if ($rootScope.user && $rootScope.user.company_id) {
-        $rootScope.bb || ($rootScope.bb = {});
-        return $rootScope.bb.company_id = $rootScope.user.company_id;
-      }
-    });
+  angular.module('BBAdmin.Controllers', ['ngSanitize']);
+
+  angular.module('BBAdmin.Services').run(["$q", "$injector", "BBModel", function($q, $injector, BBModel) {
+    var afuncs, i, len, model, models;
+    models = ['Booking', 'Slot', 'User', 'Administrator', 'Schedule', 'Address', 'Resource', 'Person', 'Service', 'Login', 'EventChain', 'EventGroup', 'Event', 'Clinic', 'Company', 'Client'];
+    afuncs = {};
+    for (i = 0, len = models.length; i < len; i++) {
+      model = models[i];
+      afuncs[model] = $injector.get("Admin" + model + "Model");
+    }
+    return BBModel['Admin'] = afuncs;
   }]);
 
 }).call(this);
 
 (function() {
   'use strict';
-  angular.module('BBAdminMockE2E', ['BBAdmin', 'ngMockE2E']);
-
-  angular.module('BBAdminMockE2E').run(["$httpBackend", function($httpBackend) {
-    var admin_schema, administrators, company, event_chain_schema, event_chains, member_bookings, member_schema, people, person_schema, queuer_schema, queuers, schedule1, schedule_schema, schedules, service_schema, services;
-    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/login/admin/123').respond(function(method, url, data) {
-      var login;
-      console.log('login post');
-      login = {
-        email: "tennis@example.com",
-        auth_token: "PO_MZmDtEhU1BK6tkMNPjg",
-        company_id: 123,
-        path: "http://www.bookingbug.com/api/v1",
-        role: "owner",
-        _embedded: {
-          members: [],
-          administrators: [
-            {
-              role: "owner",
-              name: "Tom's Tennis",
-              company_id: 123,
-              _links: {
-                self: {
-                  href: "http://www.bookingbug.com/api/v1/admin/123/administrator/29774"
-                },
-                company: {
-                  href: "http://www.bookingbug.com/api/v1/admin/123/company"
-                },
-                login: {
-                  href: "http://www.bookingbug.com/api/v1/login/admin/123"
-                }
-              }
-            }
-          ]
-        },
-        _links: {
-          self: {
-            href: "http://www.bookingbug.com/api/v1/login/123"
-          },
-          administrator: {
-            href: "http://www.bookingbug.com/api/v1/admin/123/administrator/29774",
-            templated: true
-          }
-        }
-      };
-      return [200, login, {}];
-    });
-    company = {
-      id: 123,
-      name: "Tom's Tennis",
-      currency_code: 'GBP',
-      country_code: 'gb',
-      timezone: 'Europe/London',
-      _links: {
-        self: {
-          href: 'http://www.bookingbug.com/api/v1/company/123'
-        },
-        people: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/people'
-        },
-        new_person: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/people/new{?signup}',
-          templated: true
-        },
-        administrators: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators'
-        },
-        new_administrator: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/new'
-        },
-        services: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/services'
-        },
-        new_service: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/services/new'
-        },
-        event_chains: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/event_chains'
-        },
-        new_event_chain: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/event_chains/new'
-        },
-        schedules: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/schedules'
-        },
-        new_schedule: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/schedules/new'
-        },
-        queuers: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/queuers'
-        },
-        new_queuer: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/queuers/new'
-        },
-        resources: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/resources'
-        },
-        new_resource: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/resources/new'
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/company').respond(company);
-    people = {
-      total_entries: 3,
-      _embedded: {
-        people: [
-          {
-            id: 1,
-            name: "John",
-            type: "person",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            mobile: "",
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/1"
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?person_id=1"
-              },
-              edit: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/1/edit"
-              },
-              schedule: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
-              }
-            },
-            _embedded: {}
-          }, {
-            id: 2,
-            name: "Mary",
-            type: "person",
-            email: "mary@example.com",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            mobile: "",
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/2"
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?person_id=2"
-              },
-              edit: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/2/edit"
-              },
-              schedule: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
-              }
-            },
-            _embedded: {}
-          }, {
-            id: 3,
-            name: "Bob",
-            type: "person",
-            email: "bob@example.com",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            mobile: "",
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/3"
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?person_id=3"
-              },
-              edit: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/people/3/edit"
-              },
-              schedule: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
-              }
-            },
-            _embedded: {}
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/people"
-        },
-        "new": {
-          href: "http://www.bookingbug.com/api/v1/admin/123/people/new{?signup}",
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/people').respond(people);
-    person_schema = {
-      form: [
-        '*', {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          email: {
-            title: 'Email *',
-            type: 'string'
-          },
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          phone: {
-            title: 'Phone',
-            type: 'string'
-          }
-        },
-        required: ['name', 'email'],
-        title: 'Person',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/people/new').respond(function() {
-      return [200, person_schema, {}];
-    });
-    $httpBackend.whenGET(/http:\/\/www.bookingbug.com\/api\/v1\/admin\/123\/people\/\d\/edit/).respond(function() {
-      return [200, person_schema, {}];
-    });
-    $httpBackend.whenDELETE(/http:\/\/www.bookingbug.com\/api\/v1\/admin\/123\/people\/\d/).respond(function() {
-      return [200, {}, {}];
-    });
-    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/admin/123/people').respond(function(method, url, data) {
-      console.log('post person');
-      console.log(method);
-      console.log(url);
-      console.log(data);
-      return [200, people.concat([data]), {}];
-    });
-    services = {
-      total_entries: 3,
-      _embedded: {
-        services: [
-          {
-            id: 1,
-            name: "Data analysis",
-            type: "service",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/services/1"
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/services/1/edit',
-                templated: true
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?service_id=1"
-              }
-            },
-            _embedded: {}
-          }, {
-            id: 2,
-            name: "Personal consultation",
-            type: "service",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/services/2"
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/services/2/edit',
-                templated: true
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?service_id=2"
-              }
-            },
-            _embedded: {}
-          }, {
-            id: 3,
-            name: "Marketing strategy",
-            type: "service",
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/services/3"
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/services/3/edit',
-                templated: true
-              },
-              items: {
-                href: "http://www.bookingbug.com/api/v1/123/items?service_id=3"
-              }
-            },
-            _embedded: {}
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/services"
-        },
-        "new": {
-          href: "http://www.bookingbug.com/api/v1/admin/123/services/new{?signup}",
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services').respond(services);
-    service_schema = {
-      form: [
-        {
-          'key': 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'String'
-          }
-        },
-        required: ['name'],
-        title: 'Service',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/new').respond(function() {
-      return [200, service_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/1/edit').respond(function() {
-      return [200, service_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/2/edit').respond(function() {
-      return [200, service_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/services/3/edit').respond(function() {
-      return [200, service_schema, {}];
-    });
-    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/admin/123/services').respond(function(method, url, data) {
-      console.log('post service');
-      console.log(method);
-      console.log(url);
-      console.log(data);
-      return [200, services.concat([data]), {}];
-    });
-    administrators = {
-      _embedded: {
-        administrators: [
-          {
-            name: "Dave",
-            email: "dave@example.com",
-            role: 'admin',
-            company_id: 123,
-            company_name: "Tom's Tennis",
-            _links: {
-              self: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/1'
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/1/edit'
-              },
-              company: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/company'
-              },
-              login: {
-                href: 'http://www.bookingbug.com/api/v1/login/admin/123'
-              }
-            }
-          }, {
-            name: "Sue",
-            email: "sue@example.com",
-            role: 'owner',
-            company_id: 123,
-            company_name: "Tom's Tennis",
-            _links: {
-              self: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/2'
-              },
-              edit: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/2/edit'
-              },
-              company: {
-                href: 'http://www.bookingbug.com/api/v1/admin/123/company'
-              },
-              login: {
-                href: 'http://www.bookingbug.com/api/v1/login/admin/123'
-              }
-            }
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators'
-        },
-        "new": {
-          href: 'http://www.bookingbug.com/api/v1/admin/123/administrators/new',
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators').respond(administrators);
-    admin_schema = {
-      form: [
-        {
-          key: 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'email',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'role',
-          type: 'select',
-          feedback: false,
-          titleMap: {
-            owner: 'Owner',
-            admin: 'Admin',
-            user: 'User'
-          }
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          email: {
-            title: 'Email *',
-            type: 'string'
-          },
-          role: {
-            title: 'Role',
-            type: 'string',
-            "enum": ['owner', 'admin', 'user', 'callcenter']
-          }
-        },
-        required: ['name', 'email'],
-        title: 'Administrator',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators/new').respond(function() {
-      return [200, admin_schema, {}];
-    });
-    admin_schema = {
-      form: [
-        {
-          key: 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'role',
-          type: 'select',
-          feedback: false,
-          titleMap: {
-            owner: 'Owner',
-            admin: 'Admin',
-            user: 'User'
-          }
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          role: {
-            title: 'Role',
-            type: 'string',
-            "enum": ['owner', 'admin', 'user', 'callcenter']
-          }
-        },
-        title: 'Administrator',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/administrators/1/edit').respond(function() {
-      return [200, admin_schema, {}];
-    });
-    $httpBackend.whenPOST('http://www.bookingbug.com/api/v1/login/member/123').respond(function(method, url, data) {
-      var login;
-      login = {
-        email: "smith@example.com",
-        auth_token: "TO_4ZrDtEhU1BK6tkMNPj0",
-        company_id: 123,
-        path: "http://www.bookingbug.com/api/v1",
-        role: "member",
-        _embedded: {
-          members: [
-            {
-              first_name: "John",
-              last_name: "Smith",
-              email: "smith@example.com",
-              client_type: "Member",
-              address1: "Some street",
-              address3: "Some town",
-              id: 123456,
-              company_id: 123,
-              _links: {
-                self: {
-                  href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
-                  templated: true
-                },
-                bookings: {
-                  href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings{?start_date,end_date,include_cancelled,page,per_page}",
-                  templated: true
-                },
-                company: {
-                  href: "http://www.bookingbug.com/api/v1/company/123",
-                  templated: true
-                },
-                edit_member: {
-                  href: "http://www.bookingbug.com/api/v1/123/members/123456/edit",
-                  templated: true
-                },
-                pre_paid_bookings: {
-                  href: "http://www.bookingbug.com/api/v1/123/members/123456/pre_paid_bookings{?start_date,end_date,page,per_page}",
-                  templated: true
-                }
-              }
-            }
-          ],
-          administrators: []
-        },
-        _links: {
-          self: {
-            href: "http://www.bookingbug.com/api/v1/login/123"
-          },
-          member: {
-            href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
-            templated: true
-          }
-        }
-      };
-      return [200, login, {}];
-    });
-    member_schema = {
-      form: [
-        {
-          key: 'first_name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'last_name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'email',
-          type: 'email',
-          feedback: false
-        }, {
-          key: 'address1',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'address2',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'address3',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'address4',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'postcode',
-          type: 'text',
-          feedback: false
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          first_name: {
-            title: 'First Name',
-            type: 'string'
-          },
-          last_name: {
-            title: 'Last Name',
-            type: 'string'
-          },
-          email: {
-            title: 'Email',
-            type: 'string'
-          },
-          address1: {
-            title: 'Address',
-            type: 'string'
-          },
-          address2: {
-            title: ' ',
-            type: 'string'
-          },
-          address3: {
-            title: 'Town',
-            type: 'string'
-          },
-          address4: {
-            title: 'County',
-            type: 'string'
-          },
-          postcode: {
-            title: 'Post Code',
-            type: 'string'
-          }
-        },
-        title: 'Member',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/123/members/123456/edit').respond(function() {
-      return [200, member_schema, {}];
-    });
-    member_bookings = {
-      _embedded: {
-        bookings: [
-          {
-            _embedded: {
-              answers: [
-                {
-                  admin_only: false,
-                  company_id: 123,
-                  id: 6700607,
-                  outcome: false,
-                  price: 0,
-                  question_id: 20478,
-                  question_text: "Gender",
-                  value: "M"
-                }
-              ]
-            },
-            _links: {
-              company: {
-                href: "http://www.bookingbug.com/api/v1/company/123"
-              },
-              edit_booking: {
-                href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings/4553463/edit"
-              },
-              member: {
-                href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
-                templated: true
-              },
-              person: {
-                href: "http://www.bookingbug.com/api/v1/123/people/74",
-                templated: true
-              },
-              self: {
-                href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=2014-11-21&page=1&per_page=30"
-              },
-              service: {
-                href: "http://www.bookingbug.com/api/v1/123/services/30063",
-                templated: true
-              }
-            },
-            attended: true,
-            category_name: "Private Lessons",
-            company_id: 123,
-            datetime: "2014-11-21T12:00:00+00:00",
-            describe: "Fri 21st Nov 12:00pm",
-            duration: 3600,
-            end_datetime: "2014-11-21T13:00:00+00:00",
-            event_id: 325562,
-            full_describe: "Tennis Lesson",
-            id: 4553463,
-            min_cancellation_time: "2014-11-20T12:00:00+00:00",
-            on_waitlist: false,
-            paid: 0,
-            person_name: "Bob",
-            price: 1,
-            purchase_id: 3844035,
-            purchase_ref: "j7PuYsmbexmFXS12Mzg0NDAzNQ%3D%3D",
-            quantity: 1,
-            service_name: "Tennis Lesson",
-            time_zone: ""
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=2014-11-21&page=1&per_page=30"
-        }
-      },
-      total_entries: 1
-    };
-    $httpBackend.whenGET("http://www.bookingbug.com/api/v1/123/members/123456/bookings?start_date=" + (moment().format("YYYY-MM-DD"))).respond(function() {
-      return [200, member_bookings, {}];
-    });
-    event_chains = {
-      total_entries: 1,
-      _embedded: {
-        event_chains: [
-          {
-            id: 1,
-            deleted: false,
-            disabled: false,
-            company_id: 123,
-            capacity_view: 3,
-            description: "",
-            duration: 120,
-            email_per_ticket: true,
-            end_date: "2015-11-12",
-            group: "Events",
-            long_description: "",
-            max_num_bookings: 1,
-            min_advance_time: "2015-02-13T14:24:29+00:00",
-            name: "My Event",
-            person_name: "Ed",
-            price: 0,
-            questions_per_ticket: false,
-            spaces: 10,
-            start_date: "2015-11-12",
-            ticket_type: "single_space",
-            time: "12:00:00+00:00",
-            mobile: "",
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/1"
-              },
-              edit: {
-                href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/1/edit"
-              }
-            },
-            _embedded: {}
-          }
-        ]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/event_chains"
-        },
-        "new": {
-          href: "http://www.bookingbug.com/api/v1/admin/123/event_chains/new",
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains').respond(event_chains);
-    event_chain_schema = {
-      form: [
-        {
-          key: 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'description',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'spaces',
-          type: 'number',
-          feedback: false
-        }, {
-          key: 'events',
-          feedback: false,
-          add: 'New Event',
-          style: {
-            add: 'btn-success'
-          },
-          items: [
-            {
-              key: 'events[].date',
-              type: 'date',
-              feedback: false
-            }, {
-              key: 'events[].time',
-              type: 'time',
-              feedback: false
-            }, {
-              key: 'events[].duration',
-              type: 'number',
-              feedback: false
-            }
-          ]
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          description: {
-            title: 'Description',
-            type: 'string'
-          },
-          events: {
-            title: 'Events',
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                date: {
-                  format: 'date',
-                  title: 'Date',
-                  type: 'string'
-                },
-                duration: {
-                  title: 'Duration',
-                  type: 'number'
-                },
-                time: {
-                  format: 'time',
-                  title: 'Time',
-                  type: 'string'
-                }
-              }
-            }
-          },
-          spaces: {
-            title: 'Spaces *',
-            type: 'string'
-          }
-        },
-        required: ['name', 'spaces'],
-        title: 'Event Chain',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains/new').respond(function() {
-      return [200, event_chain_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/event_chains/1/edit').respond(function() {
-      return [200, event_chain_schema, {}];
-    });
-    schedule1 = {
-      id: 1,
-      name: "Schedule1",
-      company_id: 123,
-      rules: {
-        '1': "0700-1500",
-        '2': "0700-1600,1800-1900",
-        '2015-02-01': "0600-1200"
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/1"
-        },
-        edit: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/edit"
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/1').respond(schedule1);
-    schedules = {
-      total_entries: 1,
-      _embedded: {
-        schedules: [schedule1]
-      },
-      _links: {
-        self: {
-          href: "http://www.bookingbug.com/api/v1/admin/123/schedules"
-        },
-        "new": {
-          href: "http://www.bookingbug.com/api/v1/admin/123/schedules/new",
-          templated: true
-        }
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules').respond(schedules);
-    schedule_schema = {
-      form: [
-        {
-          key: 'name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'rules',
-          type: 'schedule',
-          feedback: false
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          name: {
-            title: 'Name *',
-            type: 'string'
-          },
-          rules: {
-            title: 'Rules *',
-            type: 'string'
-          }
-        },
-        required: ['name', 'rules'],
-        title: 'Schema',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/new').respond(function() {
-      return [200, schedule_schema, {}];
-    });
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/schedules/edit').respond(function() {
-      return [200, schedule_schema, {}];
-    });
-    queuers = {
-      total_entries: 3,
-      _embedded: {
-        queuers: [
-          {
-            service_name: "Pro wrestling consultation",
-            member_name: "Joe Danger",
-            ticket_number: 1,
-            first_name: "Joe",
-            position: 1,
-            status: "queueing",
-            due_time: moment('2015-04-30 10:00'),
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/queuers/1"
-              },
-              service: {
-                href: "http://www.bookingbug.com/api/v1/123/services/30063",
-                templated: true
-              },
-              member: {
-                href: "http://www.bookingbug.com/api/v1/123/members/123456{?embed}",
-                templated: true
-              },
-              space: {
-                href: "http://www.bookingbug.com/api/v1/123/spaces/300",
-                templated: true
-              },
-              company: {
-                href: "http://www.bookingbug.com/api/v1/companies/123",
-                templated: true,
-                website: "http://www.google.com"
-              }
-            }
-          }, {
-            service_name: "Extreme yoga consultation",
-            member_name: "Jane Youwary",
-            ticket_number: 240,
-            first_name: "Jane",
-            position: 2,
-            status: "queueing",
-            due_time: moment('2015-04-30 10:30'),
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/queuers/240"
-              },
-              service: {
-                href: "http://www.bookingbug.com/api/v1/123/services/30063",
-                templated: true
-              },
-              member: {
-                href: "http://www.bookingbug.com/api/v1/123/members/223456{?embed}",
-                templated: true
-              },
-              space: {
-                href: "http://www.bookingbug.com/api/v1/123/spaces/301",
-                templated: true
-              },
-              company: {
-                href: "http://www.bookingbug.com/api/v1/companies/123",
-                templated: true
-              }
-            }
-          }, {
-            service_name: "Chess gymnastics consultation",
-            member_name: "Shanikwa Jones",
-            ticket_number: 176,
-            first_name: "Shanikwa",
-            position: 3,
-            status: "queueing",
-            due_time: moment('2015-04-30 11:00'),
-            _links: {
-              self: {
-                href: "http://www.bookingbug.com/api/v1/queuers/176"
-              },
-              service: {
-                href: "http://www.bookingbug.com/api/v1/123/services/30063",
-                templated: true
-              },
-              member: {
-                href: "http://www.bookingbug.com/api/v1/123/members/323456{?embed}",
-                templated: true
-              },
-              space: {
-                href: "http://www.bookingbug.com/api/v1/123/spaces/302",
-                templated: true
-              },
-              company: {
-                href: "http://www.bookingbug.com/api/v1/companies/123",
-                templated: true,
-                website: "http://www.google.com"
-              }
-            }
-          }
-        ]
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/queuers').respond(queuers);
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/queuers/1').respond(queuers._embedded.queuers[0]);
-    queuer_schema = {
-      form: [
-        {
-          key: 'first_name',
-          type: 'text',
-          feedback: false
-        }, {
-          key: 'last_name',
-          type: 'text',
-          feedback: false
-        }, {
-          type: 'submit',
-          title: 'Save'
-        }
-      ],
-      schema: {
-        properties: {
-          first_name: {
-            title: 'First Name *',
-            type: 'string'
-          },
-          last_name: {
-            title: 'Last Name *',
-            type: 'string'
-          }
-        },
-        required: ['name'],
-        title: 'Customer',
-        type: 'object'
-      }
-    };
-    $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/queuers/new').respond(function() {
-      return [200, queuer_schema, {}];
-    });
-    return $httpBackend.whenGET('http://www.bookingbug.com/api/v1/admin/123/queuers/edit').respond(function() {
-      return [200, queuer_schema, {}];
-    });
-  }]);
-
-}).call(this);
-
-(function() {
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -1107,7 +46,7 @@
     };
 
     Booking.prototype.matchesParams = function(item) {
-      if (this.params.start_date != null) {
+      if ((this.params.start_date != null) && item.start) {
         if (this.start_date == null) {
           this.start_date = moment(this.params.start_date);
         }
@@ -1115,7 +54,7 @@
           return false;
         }
       }
-      if (this.params.end_date != null) {
+      if ((this.params.end_date != null) && item.start) {
         if (this.end_date == null) {
           this.end_date = moment(this.params.end_date);
         }
@@ -1144,6 +83,7 @@
 }).call(this);
 
 (function() {
+  'use strict';
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -1173,6 +113,7 @@
 }).call(this);
 
 (function() {
+  'use strict';
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -1219,27 +160,17 @@
 
 (function() {
   'use strict';
-  angular.module('BBAdmin.Controllers').controller('CalendarCtrl', ["$scope", "AdminBookingService", "$rootScope", function($scope, AdminBookingService, $rootScope) {
-
-    /* event source that pulls from google.com
-    $scope.eventSource = {
-            url: "http://www.google.com/calendar/feeds/usa__en%40holiday.calendar.google.com/public/basic",
-            className: 'gcal-event',           // an option!
-            currentTimezone: 'America/Chicago' // an option!
-    };
-     */
+  angular.module('BBAdmin.Controllers').controller('CalendarCtrl', ["$scope", "BBModel", "$rootScope", function($scope, BBModel, $rootScope) {
     $scope.eventsF = function(start, end, tz, callback) {
       var bookings, prms;
-      console.log(start, end, callback);
       prms = {
         company_id: 21
       };
       prms.start_date = start.format("YYYY-MM-DD");
       prms.end_date = end.format("YYYY-MM-DD");
-      bookings = AdminBookingService.query(prms);
+      bookings = BBModel.Admin.Booking.$query(prms);
       return bookings.then((function(_this) {
         return function(s) {
-          console.log(s.items);
           callback(s.items);
           return s.addCallback(function(booking) {
             return $scope.myCalendar.fullCalendar('renderEvent', booking, true);
@@ -1250,7 +181,6 @@
     $scope.dayClick = function(date, allDay, jsEvent, view) {
       return $scope.$apply((function(_this) {
         return function() {
-          console.log(date, allDay, jsEvent, view);
           return $scope.alertMessage = 'Day Clicked ' + date;
         };
       })(this));
@@ -1349,10 +279,11 @@
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('CategoryList', ["$scope", "$location", "CategoryService", "$rootScope", function($scope, $location, CategoryService, $rootScope) {
+  'use strict';
+  angular.module('BBAdmin.Controllers').controller('CategoryList', ["$scope", "$location", "$rootScope", "BBModel", function($scope, $location, $rootScope, BBModel) {
     $rootScope.connection_started.then((function(_this) {
       return function() {
-        $scope.categories = CategoryService.query($scope.bb.company);
+        $scope.categories = BBModel.Category.$query($scope.bb.company);
         return $scope.categories.then(function(items) {});
       };
     })(this));
@@ -1386,36 +317,40 @@
     };
   });
 
-  angular.module('BBAdmin.Controllers').controller('AdminClients', ["$scope", "$rootScope", "$q", "AdminClientService", "ClientDetailsService", "AlertService", "$log", function($scope, $rootScope, $q, AdminClientService, ClientDetailsService, AlertService, $log) {
+  angular.module('BBAdmin.Controllers').controller('AdminClients', ["$scope", "$rootScope", "$q", "$log", "AlertService", "LoadingService", "BBModel", function($scope, $rootScope, $q, $log, AlertService, LoadingService, BBModel) {
+    var loader;
     $scope.clientDef = $q.defer();
     $scope.clientPromise = $scope.clientDef.promise;
     $scope.per_page = 15;
     $scope.total_entries = 0;
     $scope.clients = [];
+    loader = LoadingService.$loader($scope);
     $scope.getClients = function(currentPage, filterBy, filterByFields, orderBy, orderByReverse) {
       var clientDef;
       clientDef = $q.defer();
       $rootScope.connection_started.then(function() {
-        $scope.notLoaded($scope);
-        return AdminClientService.query({
-          company_id: $scope.bb.company_id,
+        var params;
+        loader.notLoaded();
+        params = {
+          company: $scope.bb.company,
           per_page: $scope.per_page,
           page: currentPage + 1,
           filter_by: filterBy,
           filter_by_fields: filterByFields,
           order_by: orderBy,
           order_by_reverse: orderByReverse
-        }).then((function(_this) {
+        };
+        return BBModel.Admin.Client.$query(params).then((function(_this) {
           return function(clients) {
             $scope.clients = clients.items;
-            $scope.setLoaded($scope);
+            loader.setLoaded();
             $scope.setPageLoaded();
             $scope.total_entries = clients.total_entries;
             return clientDef.resolve(clients.items);
           };
         })(this), function(err) {
           clientDef.reject(err);
-          return $scope.setLoadedAndShowError($scope, err, 'Sorry, something went wrong');
+          return loader.setLoadedAndShowError(err, 'Sorry, something went wrong');
         });
       });
       return true;
@@ -1428,6 +363,7 @@
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Controllers').controller('CompanyList', ["$scope", "$rootScope", "$location", function($scope, $rootScope, $location) {
     $scope.selectedCategory = null;
     $rootScope.connection_started.then((function(_this) {
@@ -1452,7 +388,7 @@
       };
     })(this));
     $scope.selectCompany = function(item) {
-      return window.location = "/view/dashboard/pick_company/" + item.id;
+      return $location = "/view/dashboard/pick_company/" + item.id;
     };
     $scope.advance_date = function(num) {
       var d, date, results;
@@ -1476,7 +412,8 @@
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('DashboardContainer', ["$scope", "$rootScope", "$location", "$modal", function($scope, $rootScope, $location, $modal) {
+  'use strict';
+  angular.module('BBAdmin.Controllers').controller('DashboardContainer', ["$scope", "$rootScope", "$location", "$uibModal", "$document", function($scope, $rootScope, $location, $uibModal, $document) {
     var ModalInstanceCtrl;
     $scope.selectedBooking = null;
     $scope.poppedBooking = null;
@@ -1486,7 +423,8 @@
     $scope.popupBooking = function(booking) {
       var modalInstance;
       $scope.poppedBooking = booking;
-      modalInstance = $modal.open({
+      modalInstance = $uibModal.open({
+        appendTo: angular.element($document[0].getElementById('bb')),
         templateUrl: 'full_booking_details',
         controller: ModalInstanceCtrl,
         scope: $scope,
@@ -1511,21 +449,22 @@
         };
       })(this));
     };
-    ModalInstanceCtrl = function($scope, $modalInstance, items) {
+    ModalInstanceCtrl = function($scope, $uibModalInstance, items) {
       angular.extend($scope, items);
       $scope.ok = function() {
         if (items.booking && items.booking.self) {
           items.booking.$update();
         }
-        return $modalInstance.close();
+        return $uibModalInstance.close();
       };
       return $scope.cancel = function() {
-        return $modalInstance.dismiss('cancel');
+        return $uibModalInstance.dismiss('cancel');
       };
     };
     return $scope.popupTimeAction = function(prms) {
       var modalInstance;
-      return modalInstance = $modal.open({
+      return modalInstance = $uibModal.open({
+        appendTo: angular.element($document[0].getElementById('bb')),
         templateUrl: $scope.partial_url + 'time_popup',
         controller: ModalInstanceCtrl,
         scope: $scope,
@@ -1545,7 +484,7 @@
 
 (function() {
   'use strict';
-  angular.module('BBAdmin.Controllers').controller('DashDayList', ["$scope", "$rootScope", "$q", "AdminDayService", function($scope, $rootScope, $q, AdminDayService) {
+  angular.module('BBAdmin.Controllers').controller('DashDayList', ["$scope", "$rootScope", "$q", "BBModel", function($scope, $rootScope, $q, BBModel) {
     $scope.init = (function(_this) {
       return function(company_id) {
         var date, dayListDef, prms, weekListDef;
@@ -1572,7 +511,7 @@
         $scope.dayList = dayListDef.promise;
         $scope.weeks = weekListDef.promise;
         prms.url = $scope.bb.api_url;
-        return AdminDayService.query(prms).then(function(days) {
+        return BBModel.Admin.Day.$query(prms).then(function(days) {
           $scope.sdays = days;
           dayListDef.resolve();
           if ($scope.category) {
@@ -1650,11 +589,13 @@
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Controllers').controller('EditBookingDetails', ["$scope", "$location", "$rootScope", function($scope, $location, $rootScope) {}]);
 
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Directives').directive('bbAdminLogin', function() {
     return {
       restrict: 'AE',
@@ -1670,7 +611,7 @@
     };
   });
 
-  angular.module('BBAdmin.Controllers').controller('AdminLogin', ["$scope", "$rootScope", "AdminLoginService", "$q", "$sessionStorage", function($scope, $rootScope, AdminLoginService, $q, $sessionStorage) {
+  angular.module('BBAdmin.Controllers').controller('AdminLogin', ["$scope", "$rootScope", "$q", "$sessionStorage", "BBModel", function($scope, $rootScope, $q, $sessionStorage, BBModel) {
     $scope.login = {
       host: $sessionStorage.getItem('host'),
       email: null,
@@ -1685,14 +626,14 @@
         email: $scope.login.email,
         password: $scope.login.password
       };
-      return AdminLoginService.login(params).then(function(user) {
+      return BBModel.Admin.Login.$login(params).then(function(user) {
         if (user.company_id != null) {
           $scope.user = user;
           if ($scope.onSuccess) {
             return $scope.onSuccess();
           }
         } else {
-          return user.getAdministratorsPromise().then(function(administrators) {
+          return user.$getAdministrators().then(function(administrators) {
             $scope.administrators = administrators;
             return $scope.pickCompany();
           });
@@ -1712,9 +653,9 @@
         password: $scope.login.password
       };
       return $scope.login.selected_admin.$post('login', {}, params).then(function(login) {
-        return $scope.login.selected_admin.getCompanyPromise().then(function(company) {
+        return $scope.login.selected_admin.$getCompany().then(function(company) {
           $scope.bb.company = company;
-          AdminLoginService.setLogin($scope.login.selected_admin);
+          BBModel.Admin.Login.$setLogin($scope.login.selected_admin);
           return $scope.onSuccess(company);
         });
       });
@@ -1724,7 +665,8 @@
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('SelectedBookingDetails', ["$scope", "$location", "AdminBookingService", "$rootScope", function($scope, $location, AdminBookingService, $rootScope) {
+  'use strict';
+  angular.module('BBAdmin.Controllers').controller('SelectedBookingDetails', ["$scope", "$location", "$rootScope", "BBModel", function($scope, $location, $rootScope, BBModel) {
     return $scope.$watch('selectedBooking', (function(_this) {
       return function(newValue, oldValue) {
         if (newValue) {
@@ -1736,24 +678,6 @@
   }]);
 
 }).call(this);
-
-'use strict';
-
-
-function SpaceMonitorCtrl($scope,  $location) {
-  
-
-
-  $scope.$on("Add_Space", function(event, message){
-     $scope.$apply();
-   });
-
-
-
-
-}
-
-SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 
 (function() {
   'use strict';
@@ -1864,45 +788,29 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
     })(this);
   }]);
 
-
-  /*
-    var sprice = "&price=" + price;
-    var slen = "&len=" + len
-    var sid = "&event_id=" + id
-    var str = pop_click_str + sid + slen + sprice + "&width=800"; // + "&style=wide";
-  = "/booking/new_checkout?" + siarray + sjd + sitime ;
-  
-  function show_IFrame(myUrl, options, width, height){
-    if (!height) height = 500;
-    if (!width) width = 790;
-    opts = Object.extend({className: "white", pctHeight:1, width:width+20,top:'5%', height:'90%',closable:true, recenterAuto:false}, options || {});
-    x = Dialog.info("", opts);
-      x.setHTMLContent("<iframe frameborder=0 id='mod_dlg' onload='nowait();setTimeout(set_iframe_focus, 100);' width=" + width + " height=96%" + " src='" + myUrl + "'></iframe>");
-    x.element.setStyle({top:'5%'});
-    x.element.setStyle({height:'90%'});
-  }
-   */
-
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('TimeOptions', ["$scope", "$location", "$rootScope", "AdminResourceService", "AdminPersonService", function($scope, $location, $rootScope, AdminResourceService, AdminPersonService) {
-    AdminResourceService.query({
+  'use strict';
+  angular.module('BBAdmin.Controllers').controller('TimeOptions', ["$scope", "$location", "$rootScope", "BBModel", function($scope, $location, $rootScope, BBModel) {
+    BBModel.Admin.Resource.$query({
       company: $scope.bb.company
     }).then(function(resources) {
       return $scope.resources = resources;
     });
-    AdminPersonService.query({
+    BBModel.Admin.Person.$query({
       company: $scope.bb.company
     }).then(function(people) {
       return $scope.people = people;
     });
     return $scope.block = function() {
+      var params;
       if ($scope.person) {
-        AdminPersonService.block($scope.bb.company, $scope.person, {
+        params = {
           start_time: $scope.start_time,
           end_time: $scope.end_time
-        });
+        };
+        BBModel.Admin.Person.$block($scope.bb.company, $scope.person, params);
       }
       return $scope.ok();
     };
@@ -1911,9 +819,10 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Directives').directive('adminLogin', ["$modal", "$log", "$rootScope", "AdminLoginService", "$templateCache", "$q", function($modal, $log, $rootScope, AdminLoginService, $templateCache, $q) {
+  'use strict';
+  angular.module('BBAdmin.Directives').directive('adminLogin', ["$uibModal", "$log", "$rootScope", "$q", "$document", "BBModel", function($uibModal, $log, $rootScope, $q, $document, BBModel) {
     var link, loginAdminController, pickCompanyController;
-    loginAdminController = function($scope, $modalInstance, company_id) {
+    loginAdminController = function($scope, $uibModalInstance, company_id) {
       $scope.title = 'Login';
       $scope.schema = {
         type: 'object',
@@ -1946,19 +855,19 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
         options = {
           company_id: company_id
         };
-        return AdminLoginService.login(form, options).then(function(admin) {
+        return BBModel.Admin.Login.$login(form, options).then(function(admin) {
           admin.email = form.email;
           admin.password = form.password;
-          return $modalInstance.close(admin);
+          return $uibModalInstance.close(admin);
         }, function(err) {
-          return $modalInstance.dismiss(err);
+          return $uibModalInstance.dismiss(err);
         });
       };
       return $scope.cancel = function() {
-        return $modalInstance.dismiss('cancel');
+        return $uibModalInstance.dismiss('cancel');
       };
     };
-    pickCompanyController = function($scope, $modalInstance, companies) {
+    pickCompanyController = function($scope, $uibModalInstance, companies) {
       var c;
       $scope.title = 'Pick Company';
       $scope.schema = {
@@ -2000,10 +909,10 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
       ];
       $scope.pick_company_form = {};
       $scope.submit = function(form) {
-        return $modalInstance.close(form.company_id);
+        return $uibModalInstance.close(form.company_id);
       };
       return $scope.cancel = function() {
-        return $modalInstance.dismiss('cancel');
+        return $uibModalInstance.dismiss('cancel');
       };
     };
     link = function(scope, element, attrs) {
@@ -2013,7 +922,8 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
       (base1 = $rootScope.bb).api_url || (base1.api_url = "http://www.bookingbug.com");
       loginModal = function() {
         var modalInstance;
-        modalInstance = $modal.open({
+        modalInstance = $uibModal.open({
+          appendTo: angular.element($document[0].getElementById('bb')),
           templateUrl: 'login_modal_form.html',
           controller: loginAdminController,
           resolve: {
@@ -2050,7 +960,8 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
       };
       pickCompanyModal = function(companies) {
         var modalInstance;
-        modalInstance = $modal.open({
+        modalInstance = $uibModal.open({
+          appendTo: angular.element($document[0].getElementById('bb')),
           templateUrl: 'pick_company_modal_form.html',
           controller: pickCompanyController,
           resolve: {
@@ -2075,7 +986,7 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
         options = {
           company_id: scope.companyId
         };
-        return AdminLoginService.login(login_form, options).then(function(result) {
+        return BBModel.Admin.Login.$login(login_form, options).then(function(result) {
           if (result.$has('admins')) {
             return result.$get('admins').then(function(admins) {
               var a;
@@ -2122,7 +1033,8 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', ["$rootScope", "AdminLoginService", "QueryStringService", "halClient", function($rootScope, AdminLoginService, QueryStringService, halClient) {
+  'use strict';
+  angular.module('BBAdmin.Directives').directive('bbAdminSsoLogin', ["$rootScope", "BBModel", "QueryStringService", "halClient", function($rootScope, BBModel, QueryStringService, halClient) {
     return {
       restrict: 'EA',
       scope: {
@@ -2154,7 +1066,7 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
           };
           return login.$get('administrator', params).then(function(admin) {
             scope.admin = admin;
-            return AdminLoginService.setLogin(admin);
+            return BBModel.Admin.Login.$setLogin(admin);
           });
         });
       }
@@ -2164,7 +1076,8 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin').directive('bookingTable', ["AdminCompanyService", "AdminBookingService", "$modal", "$log", "ModalForm", function(AdminCompanyService, AdminBookingService, $modal, $log, ModalForm) {
+  'use strict';
+  angular.module('BBAdmin').directive('bookingTable', ["BBModel", "ModalForm", function(BBModel, ModalForm) {
     var controller, link;
     controller = function($scope) {
       $scope.fields = ['id', 'datetime'];
@@ -2173,8 +1086,8 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
         params = {
           company: $scope.company
         };
-        return AdminBookingService.query(params).then(function(bookings) {
-          return $scope.bookings = bookings;
+        return BBModel.Admin.Booking.$query(params).then(function(bookings) {
+          return $scope.bookings = bookings.items;
         });
       };
       $scope.newBooking = function() {
@@ -2199,7 +1112,7 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
       if (scope.company) {
         return scope.getBookings();
       } else {
-        return AdminCompanyService.query(attrs).then(function(company) {
+        return BBModel.Admin.Company.$query(attrs).then(function(company) {
           scope.company = company;
           return scope.getBookings();
         });
@@ -2214,19 +1127,6 @@ SpaceMonitorCtrl.$inject = ['$scope', '$location', 'CompanyService'];
 
 }).call(this);
 
-
-
-angular.module('BBAdmin.Directives').controller('CalController', ["$scope", function($scope) {
-    /* config object */
-    $scope.calendarConfig = {
-        height: 450,
-        editiable: true,
-        dayClick: function(){
-            scope.$apply($scope.alertEventOnClick);
-        }
-    };
-}]);
-
 (function() {
   'use strict';
   angular.module('BBAdmin.Directives').directive('bbPeopleList', ["$rootScope", function($rootScope) {
@@ -2236,7 +1136,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
       scope: true,
       controller: ["$scope", "$rootScope", "PersonService", "$q", "BBModel", "PersonModel", function($scope, $rootScope, PersonService, $q, BBModel, PersonModel) {
         $rootScope.connection_started.then(function() {
-          return $scope.bb.company.getPeoplePromise().then(function(people) {
+          return $scope.bb.company.$getPeople().then(function(people) {
             var i, len, person, results;
             $scope.people = people;
             results = [];
@@ -2362,23 +1262,62 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.BookingModel", ["$q", "BBModel", "BaseModel", "BookingCollections", function($q, BBModel, BaseModel, BookingCollections) {
+  angular.module('BB.Models').factory("AdminAdministratorModel", ["$q", "BBModel", "BaseModel", function($q, BBModel, BaseModel) {
+    var Administrator;
+    return Administrator = (function(superClass) {
+      extend(Administrator, superClass);
+
+      function Administrator() {
+        return Administrator.__super__.constructor.apply(this, arguments);
+      }
+
+      return Administrator;
+
+    })(BaseModel);
+  }]);
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("AdminBookingModel", ["$q", "BBModel", "BaseModel", "BookingCollections", "$window", function($q, BBModel, BaseModel, BookingCollections, $window) {
     var Admin_Booking;
     return Admin_Booking = (function(superClass) {
       extend(Admin_Booking, superClass);
 
       function Admin_Booking(data) {
+        var k, ref, v;
         Admin_Booking.__super__.constructor.apply(this, arguments);
         this.datetime = moment(this.datetime);
         this.start = this.datetime;
-        this.end = this.datetime.clone().add(this.duration, 'minutes');
+        this.end = this.end_datetime;
+        this.end || (this.end = this.datetime.clone().add(this.duration, 'minutes'));
         this.title = this.full_describe;
         this.time = this.start.hour() * 60 + this.start.minute();
+        this.startEditable = false;
+        this.durationEditable = false;
         this.allDay = false;
+        if (this.duration_span && this.duration_span === 86400) {
+          this.allDay = true;
+        }
         if (this.status === 3) {
+          this.startEditable = true;
+          this.durationEditable = true;
           this.className = "status_blocked";
         } else if (this.status === 4) {
           this.className = "status_booked";
+        } else if (this.status === 0) {
+          this.className = "status_available";
+        }
+        if (this.multi_status) {
+          ref = this.multi_status;
+          for (k in ref) {
+            v = ref[k];
+            this.className += " status_" + k;
+          }
         }
       }
 
@@ -2519,6 +1458,67 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
         })(this));
       };
 
+      Admin_Booking.$query = function(params) {
+        var company, defer, existing, src;
+        if (params.slot) {
+          params.slot_id = params.slot.id;
+        }
+        if (params.date) {
+          params.start_date = params.date;
+          params.end_date = params.date;
+        }
+        if (params.company) {
+          company = params.company;
+          delete params.company;
+          params.company_id = company.id;
+        }
+        if (params.per_page == null) {
+          params.per_page = 1024;
+        }
+        if (params.include_cancelled == null) {
+          params.include_cancelled = false;
+        }
+        defer = $q.defer();
+        existing = BookingCollections.find(params);
+        if (existing && !params.skip_cache) {
+          defer.resolve(existing);
+        } else {
+          src = company;
+          src || (src = params.src);
+          if (params.src) {
+            delete params.src;
+          }
+          if (params.skip_cache) {
+            if (existing) {
+              BookingCollections["delete"](existing);
+            }
+            src.$flush('bookings', params);
+          }
+          src.$get('bookings', params).then(function(collection) {
+            return collection.$get('bookings').then(function(bookings) {
+              var b, models, spaces;
+              models = (function() {
+                var i, len, results;
+                results = [];
+                for (i = 0, len = bookings.length; i < len; i++) {
+                  b = bookings[i];
+                  results.push(new BBModel.Admin.Booking(b));
+                }
+                return results;
+              })();
+              spaces = new $window.Collection.Booking(collection, models, params);
+              BookingCollections.add(spaces);
+              return defer.resolve(spaces);
+            }, function(err) {
+              return defer.reject(err);
+            });
+          }, function(err) {
+            return defer.reject(err);
+          });
+        }
+        return defer.promise;
+      };
+
       return Admin_Booking;
 
     })(BaseModel);
@@ -2531,7 +1531,121 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.LoginModel", ["$q", "BBModel", "BaseModel", function($q, BBModel, BaseModel) {
+  angular.module('BB.Models').factory("AdminClientModel", ["ClientModel", "$q", "BBModel", "$log", "$window", "ClientCollections", "$rootScope", "UriTemplate", "halClient", function(ClientModel, $q, BBModel, $log, $window, ClientCollections, $rootScope, UriTemplate, halClient) {
+    var Admin_Client;
+    return Admin_Client = (function(superClass) {
+      extend(Admin_Client, superClass);
+
+      function Admin_Client(data) {
+        Admin_Client.__super__.constructor.call(this, data);
+      }
+
+      Admin_Client.$query = function(params) {
+        var company, defer, href, uri, url;
+        company = params.company;
+        defer = $q.defer();
+        if (company.$has('client')) {
+          url = "";
+          if ($rootScope.bb.api_url) {
+            url = $rootScope.bb.api_url;
+          }
+          href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields}";
+          params.company_id = company.id;
+          uri = new UriTemplate(href).fillFromObject(params || {});
+          if (params.flush) {
+            halClient.clearCache(uri);
+          }
+          halClient.$get(uri, {}).then((function(_this) {
+            return function(resource) {
+              var client;
+              if (resource.$has('clients')) {
+                return resource.$get('clients').then(function(clients) {
+                  var c, models;
+                  models = (function() {
+                    var i, len, results;
+                    results = [];
+                    for (i = 0, len = clients.length; i < len; i++) {
+                      c = clients[i];
+                      results.push(new BBModel.Admin.Client(c));
+                    }
+                    return results;
+                  })();
+                  clients = new $window.Collection.Client(resource, models, params);
+                  clients.total_entries = resource.total_entries;
+                  ClientCollections.add(clients);
+                  return defer.resolve(clients);
+                }, function(err) {
+                  return defer.reject(err);
+                });
+              } else {
+                client = new BBModel.Admin.Client(resource);
+                return defer.resolve(client);
+              }
+            };
+          })(this), function(err) {
+            return defer.reject(err);
+          });
+        } else {
+          $log.warn('company has no client link');
+          defer.reject('company has no client link');
+        }
+        return defer.promise;
+      };
+
+      return Admin_Client;
+
+    })(ClientModel);
+  }]);
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("AdminCompanyModel", ["CompanyModel", "AdminCompanyService", "BookingCollections", "$q", "BBModel", function(CompanyModel, AdminCompanyService, BookingCollections, $q, BBModel) {
+    var Admin_Company;
+    return Admin_Company = (function(superClass) {
+      extend(Admin_Company, superClass);
+
+      function Admin_Company(data) {
+        Admin_Company.__super__.constructor.call(this, data);
+      }
+
+      Admin_Company.prototype.getBooking = function(id) {
+        var defer;
+        defer = $q.defer();
+        this.$get('bookings', {
+          id: id
+        }).then(function(booking) {
+          var model;
+          model = new BBModel.Admin.Booking(booking);
+          BookingCollections.checkItems(model);
+          return defer.resolve(model);
+        }, function(err) {
+          return defer.reject(err);
+        });
+        return defer.promise;
+      };
+
+      Admin_Company.$query = function(params) {
+        return AdminCompanyService.query(params);
+      };
+
+      return Admin_Company;
+
+    })(CompanyModel);
+  }]);
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  angular.module('BB.Models').factory("AdminLoginModel", ["$q", "AdminLoginService", "BBModel", "BaseModel", function($q, AdminLoginService, BBModel, BaseModel) {
     var Admin_Login;
     return Admin_Login = (function(superClass) {
       extend(Admin_Login, superClass);
@@ -2539,6 +1653,50 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
       function Admin_Login(data) {
         Admin_Login.__super__.constructor.call(this, data);
       }
+
+      Admin_Login.$login = function(form, options) {
+        return AdminLoginService.login(form, options);
+      };
+
+      Admin_Login.$ssoLogin = function(options, data) {
+        return AdminLoginService.ssoLogin(options, data);
+      };
+
+      Admin_Login.$isLoggedIn = function() {
+        return AdminLoginService.isLoggedIn();
+      };
+
+      Admin_Login.$setLogin = function(user) {
+        return AdminLoginService.setLogin(user);
+      };
+
+      Admin_Login.$user = function() {
+        return AdminLoginService.user();
+      };
+
+      Admin_Login.$checkLogin = function(params) {
+        return AdminLoginService.checkLogin(params);
+      };
+
+      Admin_Login.$logout = function() {
+        return AdminLoginService.logout();
+      };
+
+      Admin_Login.$getLogin = function(options) {
+        return AdminLoginService.getLogin(options);
+      };
+
+      Admin_Login.$companyLogin = function(company, params) {
+        return AdminLoginService.companyLogin(company, params);
+      };
+
+      Admin_Login.$memberQuery = function(params) {
+        return AdminLoginService.memberQuery(params);
+      };
+
+      Admin_Login.$setCompany = function(company_id) {
+        return AdminLoginService.setCompany(company_id);
+      };
 
       return Admin_Login;
 
@@ -2552,12 +1710,13 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.SlotModel", ["$q", "BBModel", "BaseModel", "TimeSlotModel", function($q, BBModel, BaseModel, TimeSlotModel) {
+  angular.module('BB.Models').factory("AdminSlotModel", ["$q", "BBModel", "BaseModel", "TimeSlotModel", function($q, BBModel, BaseModel, TimeSlotModel) {
     var Admin_Slot;
     return Admin_Slot = (function(superClass) {
       extend(Admin_Slot, superClass);
 
       function Admin_Slot(data) {
+        var k, ref, v;
         Admin_Slot.__super__.constructor.call(this, data);
         this.title = this.full_describe;
         if (this.status === 0) {
@@ -2565,15 +1724,30 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
         }
         this.datetime = moment(this.datetime);
         this.start = this.datetime;
+        this.end = this.end_datetime;
         this.end = this.datetime.clone().add(this.duration, 'minutes');
         this.time = this.start.hour() * 60 + this.start.minute();
+        this.startEditable = false;
+        this.durationEditable = false;
         this.allDay = false;
+        if (this.duration_span && this.duration_span === 86400) {
+          this.allDay = true;
+        }
         if (this.status === 3) {
+          this.startEditable = true;
+          this.durationEditable = true;
           this.className = "status_blocked";
         } else if (this.status === 4) {
           this.className = "status_booked";
         } else if (this.status === 0) {
           this.className = "status_available";
+        }
+        if (this.multi_status) {
+          ref = this.multi_status;
+          for (k in ref) {
+            v = ref[k];
+            this.className += " status_" + k;
+          }
         }
       }
 
@@ -2585,10 +1759,11 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
+  'use strict';
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("Admin.UserModel", ["$q", "BBModel", "BaseModel", function($q, BBModel, BaseModel) {
+  angular.module('BB.Models').factory("AdminUserModel", ["$q", "BBModel", "BaseModel", function($q, BBModel, BaseModel) {
     var User;
     return User = (function(superClass) {
       extend(User, superClass);
@@ -2605,6 +1780,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Services').factory('AdminBookingService', ["$q", "$window", "halClient", "BookingCollections", "BBModel", "UriTemplate", function($q, $window, halClient, BookingCollections, BBModel, UriTemplate) {
     return {
       query: function(prms) {
@@ -2879,75 +2055,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminClientService', ["$q", "$window", "$rootScope", "halClient", "ClientCollections", "BBModel", "UriTemplate", function($q, $window, $rootScope, halClient, ClientCollections, BBModel, UriTemplate) {
-    return {
-      query: function(prms) {
-        var deferred, href, uri, url;
-        if (prms.company) {
-          prms.company_id = prms.company.id;
-        }
-        url = "";
-        if ($rootScope.bb.api_url) {
-          url = $rootScope.bb.api_url;
-        }
-        href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields}";
-        uri = new UriTemplate(href).fillFromObject(prms || {});
-        deferred = $q.defer();
-        if (prms.flush) {
-          halClient.clearCache(uri);
-        }
-        halClient.$get(uri, {}).then((function(_this) {
-          return function(resource) {
-            var client;
-            if (resource.$has('clients')) {
-              return resource.$get('clients').then(function(items) {
-                var clients, i, people;
-                people = (function() {
-                  var j, len, results;
-                  results = [];
-                  for (j = 0, len = items.length; j < len; j++) {
-                    i = items[j];
-                    results.push(new BBModel.Client(i));
-                  }
-                  return results;
-                })();
-                clients = new $window.Collection.Client(resource, people, prms);
-                clients.total_entries = resource.total_entries;
-                ClientCollections.add(clients);
-                return deferred.resolve(clients);
-              });
-            } else {
-              client = new BBModel.Client(resource);
-              return deferred.resolve(client);
-            }
-          };
-        })(this), (function(_this) {
-          return function(err) {
-            return deferred.reject(err);
-          };
-        })(this));
-        return deferred.promise;
-      },
-      update: function(client) {
-        var deferred;
-        deferred = $q.defer();
-        client.$put('self', {}, client).then((function(_this) {
-          return function(res) {
-            return deferred.resolve(new BBModel.Client(res));
-          };
-        })(this), (function(_this) {
-          return function(err) {
-            return deferred.reject(err);
-          };
-        })(this));
-        return deferred.promise;
-      }
-    };
-  }]);
-
-}).call(this);
-
-(function() {
+  'use strict';
   angular.module('BBAdmin.Services').factory('ColorPalette', function() {
     var colors;
     colors = [
@@ -2989,7 +2097,8 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Services').factory('AdminCompanyService', ["$q", "BBModel", "AdminLoginService", "$rootScope", "$sessionStorage", function($q, BBModel, AdminLoginService, $rootScope, $sessionStorage) {
+  'use strict';
+  angular.module('BBAdmin.Services').factory('AdminCompanyService', ["$q", "$rootScope", "$sessionStorage", "BBModel", function($q, $rootScope, $sessionStorage, BBModel) {
     return {
       query: function(params) {
         var base, base1, base2, defer;
@@ -2998,13 +2107,13 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
         (base = $rootScope.bb).api_url || (base.api_url = $sessionStorage.getItem("host"));
         (base1 = $rootScope.bb).api_url || (base1.api_url = params.apiUrl);
         (base2 = $rootScope.bb).api_url || (base2.api_url = "");
-        AdminLoginService.checkLogin(params).then(function() {
+        BBModel.Admin.Login.$checkLogin(params).then(function() {
           var login_form, options;
           if ($rootScope.user && $rootScope.user.company_id) {
             $rootScope.bb || ($rootScope.bb = {});
             $rootScope.bb.company_id = $rootScope.user.company_id;
             return $rootScope.user.$get('company').then(function(company) {
-              return defer.resolve(BBModel.Company(company));
+              return defer.resolve(new BBModel.Admin.Company(company));
             }, function(err) {
               return defer.reject(err);
             });
@@ -3016,9 +2125,9 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
             options = {
               company_id: params.companyId
             };
-            return AdminLoginService.login(login_form, options).then(function(user) {
+            return BBModel.Admin.Login.$login(login_form, options).then(function(user) {
               return user.$get('company').then(function(company) {
-                return defer.resolve(BBModel.Company(company));
+                return defer.resolve(new BBModel.Admin.Company(company));
               }, function(err) {
                 return defer.reject(err);
               });
@@ -3035,6 +2144,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Services').factory('AdminDayService', ["$q", "$window", "halClient", "BBModel", "UriTemplate", function($q, $window, halClient, BBModel, UriTemplate) {
     return {
       query: function(prms) {
@@ -3084,6 +2194,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Services').factory("AdminLoginService", ["$q", "halClient", "$rootScope", "BBModel", "$sessionStorage", "$cookies", "UriTemplate", "shared_header", function($q, halClient, $rootScope, BBModel, $sessionStorage, $cookies, UriTemplate, shared_header) {
     return {
       login: function(form, options) {
@@ -3159,8 +2270,8 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
       },
       setLogin: function(user) {
         var auth_token;
-        auth_token = user.getOption('auth_token');
         user = new BBModel.Admin.User(user);
+        auth_token = user.getOption('auth_token');
         $sessionStorage.setItem("user", user.$toStore());
         $sessionStorage.setItem("auth_token", auth_token);
         $rootScope.user = user;
@@ -3219,15 +2330,20 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
         return defer.promise;
       },
       logout: function() {
-        var url;
+        var defer, url;
+        defer = $q.defer();
         url = $rootScope.bb.api_url + "/api/v1/login";
-        return halClient.$del(url)["finally"](function() {
+        halClient.$del(url)["finally"](function() {
           $rootScope.user = null;
           $sessionStorage.removeItem("user");
           $sessionStorage.removeItem("auth_token");
           $cookies['Auth-Token'] = null;
-          return shared_header.del('auth_token');
+          shared_header.del('auth_token');
+          return defer.resolve();
+        }, function() {
+          return defer.reject();
         });
+        return defer.promise;
       },
       getLogin: function(options) {
         var defer, url;
@@ -3282,6 +2398,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Services').factory('AdminPurchaseService', ["$q", "halClient", "BBModel", function($q, halClient, BBModel) {
     return {
       query: function(params) {
@@ -3346,6 +2463,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Services').factory('AdminSlotService', ["$q", "$window", "halClient", "SlotCollections", "BBModel", "UriTemplate", function($q, $window, halClient, SlotCollections, BBModel, UriTemplate) {
     return {
       query: function(prms) {
@@ -3463,6 +2581,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BBAdmin.Services').factory('AdminTimeService', ["$q", "$window", "halClient", "BBModel", "UriTemplate", function($q, $window, halClient, BBModel, UriTemplate) {
     return {
       query: function(prms) {
@@ -3517,6 +2636,7 @@ angular.module('BBAdmin.Directives').controller('CalController', ["$scope", func
 }).call(this);
 
 (function() {
+  'use strict';
   angular.module('BB.Services').factory("BB.Service.login", ["$q", "BBModel", function($q, BBModel) {
     return {
       unwrap: function(resource) {
