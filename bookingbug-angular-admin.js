@@ -1447,34 +1447,46 @@
       };
 
       Admin_Booking.prototype.$update = function(data) {
+        var defer;
+        defer = $q.defer();
         if (data) {
           data.datetime = moment(data.datetime);
           data.datetime.tz();
           data.datetime = data.datetime.format();
         }
         data || (data = this.getPostData());
-        return this.$put('self', {}, data).then((function(_this) {
+        this.$put('self', {}, data).then((function(_this) {
           return function(res) {
             _this.constructor(res);
             if (_this.using_full_time) {
               _this.useFullTime();
             }
-            return BookingCollections.checkItems(_this);
+            BookingCollections.checkItems(_this);
+            return defer.resolve(_this);
           };
-        })(this));
+        })(this), function(err) {
+          return defer.reject(err);
+        });
+        return defer.promise;
       };
 
       Admin_Booking.prototype.$refetch = function() {
+        var defer;
+        defer = $q.defer();
         this.$flush('self');
-        return this.$get('self').then((function(_this) {
+        this.$get('self').then((function(_this) {
           return function(res) {
             _this.constructor(res);
             if (_this.using_full_time) {
               _this.useFullTime();
             }
-            return BookingCollections.checkItems(_this);
+            BookingCollections.checkItems(_this);
+            return defer.resolve(_this);
           };
-        })(this));
+        })(this), function(err) {
+          return defer.reject(err);
+        });
+        return defer.promise;
       };
 
       Admin_Booking.$query = function(params) {
