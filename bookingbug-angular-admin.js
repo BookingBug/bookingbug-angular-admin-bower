@@ -637,7 +637,7 @@
       password: null,
       selected_admin: null
     };
-    $scope.login_template = 'admin_login.html';
+    $scope.login_template = 'login/admin_login.html';
     $scope.login = function() {
       var params;
       $scope.alert = "";
@@ -662,7 +662,7 @@
       });
     };
     $scope.pickCompany = function() {
-      return $scope.login_template = 'admin_pick_company.html';
+      return $scope.login_template = 'login/admin_pick_company.html';
     };
     return $scope.selectedCompany = function() {
       var params;
@@ -2682,6 +2682,27 @@
         return new BBModel.Admin.Login(resource);
       }
     };
+  });
+
+}).call(this);
+
+(function() {
+  'use strict';
+  angular.module('BBAdmin').config(function($translateProvider) {
+    'ngInject';
+    var translations;
+    translations = {
+      ADMIN: {
+        MODAL: {
+          CANCEL_BOOKING: {
+            REASON: 'Cancel reason',
+            SEND_EMAIL: 'Send cancellation confirmation to {{email}}?',
+            TITLE: 'Cancel Booking'
+          }
+        }
+      }
+    };
+    $translateProvider.translations('en', translations);
   });
 
 }).call(this);
