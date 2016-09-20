@@ -31,13 +31,13 @@
     return FormTransformProvider.setTransform('edit', 'Admin_Booking', function(form) {
       if (form[0].tabs) {
         _.each(form[0].tabs[0].items, function(item) {
-          if (_.indexOf(['datetime', 'service', 'person_id'], item.key) > -1) {
+          if (_.indexOf(['datetime', 'service', 'person_id', 'resource_id'], item.key) > -1) {
             return item.readonly = true;
           }
         });
       } else {
         _.each(form, function(item) {
-          if (_.indexOf(['datetime', 'service', 'person_id'], item.key) > -1) {
+          if (_.indexOf(['datetime', 'service', 'person_id', 'resource_id'], item.key) > -1) {
             return item.readonly = true;
           }
         });
