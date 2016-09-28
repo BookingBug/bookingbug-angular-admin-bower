@@ -1375,6 +1375,7 @@
         data.post_time = this.post_time;
         data.person_id = this.person_id;
         data.resource_id = this.resource_id;
+        data.child_client_ids = this.child_client_ids;
         if (this.questions) {
           data.questions = (function() {
             var i, len, ref, results;
@@ -1525,24 +1526,30 @@
             }
             src.$flush('bookings', params);
           }
-          src.$get('bookings', params).then(function(collection) {
-            return collection.$get('bookings').then(function(bookings) {
-              var b, models, spaces;
-              models = (function() {
-                var i, len, results;
-                results = [];
-                for (i = 0, len = bookings.length; i < len; i++) {
-                  b = bookings[i];
-                  results.push(new BBModel.Admin.Booking(b));
-                }
-                return results;
-              })();
-              spaces = new $window.Collection.Booking(collection, models, params);
-              BookingCollections.add(spaces);
-              return defer.resolve(spaces);
-            }, function(err) {
-              return defer.reject(err);
-            });
+          src.$get('bookings', params).then(function(resource) {
+            var booking;
+            if (resource.$has('bookings')) {
+              return resource.$get('bookings').then(function(bookings) {
+                var b, models, spaces;
+                models = (function() {
+                  var i, len, results;
+                  results = [];
+                  for (i = 0, len = bookings.length; i < len; i++) {
+                    b = bookings[i];
+                    results.push(new BBModel.Admin.Booking(b));
+                  }
+                  return results;
+                })();
+                spaces = new $window.Collection.Booking(resource, models, params);
+                BookingCollections.add(spaces);
+                return defer.resolve(spaces);
+              }, function(err) {
+                return defer.reject(err);
+              });
+            } else {
+              booking = new BBModel.Admin.Booking(resource);
+              return defer.resolve(booking);
+            }
           }, function(err) {
             return defer.reject(err);
           });
