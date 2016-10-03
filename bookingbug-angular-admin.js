@@ -1322,8 +1322,6 @@
         this.end || (this.end = this.datetime.clone().add(this.duration, 'minutes'));
         this.title = this.full_describe;
         this.time = this.start.hour() * 60 + this.start.minute();
-        this.startEditable = false;
-        this.durationEditable = false;
         this.allDay = false;
         if (this.duration_span && this.duration_span === 86400) {
           this.allDay = true;
