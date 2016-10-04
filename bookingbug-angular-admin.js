@@ -1752,7 +1752,7 @@
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  angular.module('BB.Models').factory("AdminSlotModel", function($q, BBModel, BaseModel, TimeSlotModel) {
+  angular.module('BB.Models').factory("AdminSlotModel", function($q, BBModel, BaseModel, TimeSlotModel, SlotCollections, $window) {
     var Admin_Slot;
     return Admin_Slot = (function(superClass) {
       extend(Admin_Slot, superClass);
@@ -1769,8 +1769,7 @@
         this.end = this.end_datetime;
         this.end = this.datetime.clone().add(this.duration, 'minutes');
         this.time = this.start.hour() * 60 + this.start.minute();
-        this.startEditable = false;
-        this.durationEditable = false;
+        this.title = this.full_describe;
         this.allDay = false;
         if (this.duration_span && this.duration_span === 86400) {
           this.allDay = true;
@@ -1792,6 +1791,102 @@
           }
         }
       }
+
+      Admin_Slot.prototype.useFullTime = function() {
+        this.using_full_time = true;
+        if (this.pre_time) {
+          this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
+        }
+        if (this.post_time) {
+          return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
+        }
+      };
+
+      Admin_Slot.prototype.$refetch = function() {
+        var defer;
+        defer = $q.defer();
+        this.$flush('self');
+        this.$get('self').then((function(_this) {
+          return function(res) {
+            _this.constructor(res);
+            if (_this.using_full_time) {
+              _this.useFullTime();
+            }
+            BookingCollections.checkItems(_this);
+            return defer.resolve(_this);
+          };
+        })(this), function(err) {
+          return defer.reject(err);
+        });
+        return defer.promise;
+      };
+
+      Admin_Slot.$query = function(params) {
+        var company, defer, existing, src;
+        if (params.slot) {
+          params.slot_id = params.slot.id;
+        }
+        if (params.date) {
+          params.start_date = params.date;
+          params.end_date = params.date;
+        }
+        if (params.company) {
+          company = params.company;
+          delete params.company;
+          params.company_id = company.id;
+        }
+        if (params.per_page == null) {
+          params.per_page = 1024;
+        }
+        if (params.include_cancelled == null) {
+          params.include_cancelled = false;
+        }
+        defer = $q.defer();
+        existing = SlotCollections.find(params);
+        if (existing && !params.skip_cache) {
+          defer.resolve(existing);
+        } else {
+          src = company;
+          src || (src = params.src);
+          if (params.src) {
+            delete params.src;
+          }
+          if (params.skip_cache) {
+            if (existing) {
+              SlotCollections["delete"](existing);
+            }
+            src.$flush('slots', params);
+          }
+          src.$get('slots', params).then(function(resource) {
+            var slot;
+            if (resource.$has('slots')) {
+              return resource.$get('slots').then(function(slots) {
+                var b, models, spaces;
+                models = (function() {
+                  var i, len, results;
+                  results = [];
+                  for (i = 0, len = slots.length; i < len; i++) {
+                    b = slots[i];
+                    results.push(new BBModel.Admin.Slot(b));
+                  }
+                  return results;
+                })();
+                spaces = new $window.Collection.Slot(resource, models, params);
+                SlotCollections.add(spaces);
+                return defer.resolve(spaces);
+              }, function(err) {
+                return defer.reject(err);
+              });
+            } else {
+              slot = new BBModel.Admin.Slot(resource);
+              return defer.resolve(slot);
+            }
+          }, function(err) {
+            return defer.reject(err);
+          });
+        }
+        return defer.promise;
+      };
 
       return Admin_Slot;
 
@@ -2302,13 +2397,18 @@
         return deferred.promise;
       },
       isLoggedIn: function() {
-        return this.checkLogin().then(function() {
+        var deferred;
+        deferred = $q.defer();
+        this.checkLogin().then(function() {
           if ($rootScope.user) {
-            return true;
+            return deferred.resolve(true);
           } else {
-            return false;
+            return deferred.reject(false);
           }
+        }, function(err) {
+          return deferred.reject(false);
         });
+        return deferred.promise;
       },
       setLogin: function(user) {
         var auth_token;
