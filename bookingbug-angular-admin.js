@@ -449,7 +449,6 @@
       var modalInstance;
       $scope.poppedBooking = booking;
       modalInstance = $uibModal.open({
-        appendTo: angular.element($document[0].getElementById('bb')),
         templateUrl: 'full_booking_details',
         controller: ModalInstanceCtrl,
         scope: $scope,
@@ -489,7 +488,6 @@
     return $scope.popupTimeAction = function(prms) {
       var modalInstance;
       return modalInstance = $uibModal.open({
-        appendTo: angular.element($document[0].getElementById('bb')),
         templateUrl: $scope.partial_url + 'time_popup',
         controller: ModalInstanceCtrl,
         scope: $scope,
@@ -948,7 +946,6 @@
       loginModal = function() {
         var modalInstance;
         modalInstance = $uibModal.open({
-          appendTo: angular.element($document[0].getElementById('bb')),
           templateUrl: 'login_modal_form.html',
           controller: loginAdminController,
           resolve: {
@@ -986,7 +983,6 @@
       pickCompanyModal = function(companies) {
         var modalInstance;
         modalInstance = $uibModal.open({
-          appendTo: angular.element($document[0].getElementById('bb')),
           templateUrl: 'pick_company_modal_form.html',
           controller: pickCompanyController,
           resolve: {
