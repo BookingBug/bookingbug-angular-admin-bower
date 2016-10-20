@@ -2434,7 +2434,7 @@
           $rootScope.user = new BBModel.Admin.User(halClient.createResource(user));
           defer.resolve();
         } else {
-          auth_token = $cookies['Auth-Token'];
+          auth_token = $cookies.get('Auth-Token');
           if (auth_token) {
             if ($rootScope.bb.api_url) {
               url = $rootScope.bb.api_url + "/api/v1/login{?id,role}";
@@ -2475,7 +2475,7 @@
           $rootScope.user = null;
           $sessionStorage.removeItem("user");
           $sessionStorage.removeItem("auth_token");
-          $cookies['Auth-Token'] = null;
+          $cookies.remove('Auth-Token');
           shared_header.del('auth_token');
           return defer.resolve();
         }, function() {
