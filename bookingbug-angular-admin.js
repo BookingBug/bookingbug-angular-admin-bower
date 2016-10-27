@@ -1376,6 +1376,7 @@
         data.person_id = this.person_id;
         data.resource_id = this.resource_id;
         data.child_client_ids = this.child_client_ids;
+        data.people_ids = this.people_ids;
         if (this.questions) {
           data.questions = (function() {
             var i, len, ref, results;
