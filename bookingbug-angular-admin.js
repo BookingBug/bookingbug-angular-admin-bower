@@ -2,10 +2,6 @@
   'use strict';
   angular.module('BBAdmin', ['BB', 'BBAdmin.Services', 'BBAdmin.Filters', 'BBAdmin.Directives', 'BBAdmin.Controllers', 'BBAdmin.Models', 'BBAdmin.Directives', 'trNgGrid']);
 
-  angular.module('BBAdmin').config(function($logProvider) {
-    return $logProvider.debugEnabled(true);
-  });
-
   angular.module('BBAdmin.Directives', []);
 
   angular.module('BBAdmin.Filters', []);
@@ -16,19 +12,18 @@
 
   angular.module('BBAdmin.Controllers', ['ngSanitize']);
 
-  angular.module('BBAdmin.Services').run(function($q, $injector, BBModel) {
-    var afuncs, i, len, model, models;
-    models = ['Booking', 'Slot', 'User', 'Administrator', 'Schedule', 'Address', 'Resource', 'Person', 'Service', 'Login', 'EventChain', 'EventGroup', 'Event', 'Clinic', 'Company', 'Client'];
-    afuncs = {};
-    for (i = 0, len = models.length; i < len; i++) {
-      model = models[i];
-      afuncs[model] = $injector.get("Admin" + model + "Model");
-    }
-    return BBModel['Admin'] = afuncs;
+}).call(this);
+
+(function() {
+  'use strict';
+  angular.module('BBAdmin').config(function($logProvider) {
+    'ngInject';
+    $logProvider.debugEnabled(true);
   });
 
   angular.module('BB').config(function(FormTransformProvider) {
-    return FormTransformProvider.setTransform('edit', 'Admin_Booking', function(form, schema, model) {
+    'ngInject';
+    FormTransformProvider.setTransform('edit', 'Admin_Booking', function(form, schema, model) {
       var disable_list;
       if (model && model.status === 3) {
         disable_list = ['service', 'person_id', 'resource_id'];
@@ -50,6 +45,22 @@
       }
       return form;
     });
+  });
+
+}).call(this);
+
+(function() {
+  'use strict';
+  angular.module('BBAdmin.Services').run(function($q, $injector, BBModel) {
+    'ngInject';
+    var afuncs, i, len, model, models;
+    models = ['Booking', 'Slot', 'User', 'Administrator', 'Schedule', 'Address', 'Resource', 'Person', 'Service', 'Login', 'EventChain', 'EventGroup', 'Event', 'Clinic', 'Company', 'Client'];
+    afuncs = {};
+    for (i = 0, len = models.length; i < len; i++) {
+      model = models[i];
+      afuncs[model] = $injector.get("Admin" + model + "Model");
+    }
+    BBModel['Admin'] = afuncs;
   });
 
 }).call(this);
@@ -2807,6 +2818,20 @@
             SEND_EMAIL: 'Send cancellation confirmation to {{email}}?',
             TITLE: 'Cancel Booking'
           }
+        },
+        LOGIN: {
+          EMAIL_LABEL: 'Email',
+          EMAIL_PLACEHOLDER: 'Email',
+          PASSWORD_LABEL: 'Password',
+          PASSWORD_PLACEHOLDER: 'Password',
+          LOGIN_BTN: 'Login'
+        },
+        PICK_COMPANY: {
+          STEP_SUMMARY: 'Pick Company'
+        },
+        BOOKNG_TABLE: {
+          NEW_BOOKING_BTN: 'New booking',
+          EDIT_BTN: 'Edit'
         }
       }
     };
