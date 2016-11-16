@@ -646,7 +646,7 @@
   });
 
   angular.module('BBAdmin.Controllers').controller('AdminLogin', function($scope, $rootScope, $q, $sessionStorage, BBModel) {
-    $scope.login = {
+    $scope.login_form = {
       host: $sessionStorage.getItem('host'),
       email: null,
       password: null,
@@ -657,8 +657,8 @@
       var params;
       $scope.alert = "";
       params = {
-        email: $scope.login.email,
-        password: $scope.login.password
+        email: $scope.login_form.email,
+        password: $scope.login_form.password
       };
       return BBModel.Admin.Login.$login(params).then(function(user) {
         if (user.company_id != null) {
@@ -683,13 +683,13 @@
       var params;
       $scope.alert = "";
       params = {
-        email: $scope.login.email,
-        password: $scope.login.password
+        email: $scope.login_form.email,
+        password: $scope.login_form.password
       };
-      return $scope.login.selected_admin.$post('login', {}, params).then(function(login) {
-        return $scope.login.selected_admin.$getCompany().then(function(company) {
+      return $scope.login_form.selected_admin.$post('login', {}, params).then(function(login) {
+        return $scope.login_form.selected_admin.$getCompany().then(function(company) {
           $scope.bb.company = company;
-          BBModel.Admin.Login.$setLogin($scope.login.selected_admin);
+          BBModel.Admin.Login.$setLogin($scope.login_form.selected_admin);
           return $scope.onSuccess(company);
         });
       });
@@ -2818,20 +2818,6 @@
             SEND_EMAIL: 'Send cancellation confirmation to {{email}}?',
             TITLE: 'Cancel Booking'
           }
-        },
-        LOGIN: {
-          EMAIL_LABEL: 'Email',
-          EMAIL_PLACEHOLDER: 'Email',
-          PASSWORD_LABEL: 'Password',
-          PASSWORD_PLACEHOLDER: 'Password',
-          LOGIN_BTN: 'Login'
-        },
-        PICK_COMPANY: {
-          STEP_SUMMARY: 'Pick Company'
-        },
-        BOOKNG_TABLE: {
-          NEW_BOOKING_BTN: 'New booking',
-          EDIT_BTN: 'Edit'
         }
       }
     };
