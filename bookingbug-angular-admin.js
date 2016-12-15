@@ -2842,7 +2842,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         if ($rootScope.bb.api_url) {
           url = $rootScope.bb.api_url;
         }
-        href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields}";
+        href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields,default_company_id}";
         uri = new UriTemplate(href).fillFromObject(prms || {});
         deferred = $q.defer();
         if (prms.flush) {
