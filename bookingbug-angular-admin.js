@@ -361,10 +361,10 @@ angular.module('BBAdmin.Controllers').controller('CategoryList', function ($scop
         });
 
         $scope.$watch('selectedCategory', function (newValue, oldValue) {
-                var items = void 0;
+
                 $rootScope.category = newValue;
 
-                return items = $('.inline_time').each(function (idx, e) {
+                return $('.inline_time').each(function (idx, e) {
                         return angular.element(e).scope().clear();
                 });
         });
@@ -530,8 +530,7 @@ angular.module('BBAdmin.Controllers').controller('DashboardContainer', function 
     // a popup performing an action on a time, possible blocking, or mkaing a new booking
     return $scope.popupTimeAction = function (prms) {
 
-        var modalInstance = void 0;
-        return modalInstance = $uibModal.open({
+        return $uibModal.open({
             templateUrl: $scope.partial_url + 'time_popup',
             controller: ModalInstanceCtrl,
             scope: $scope,
@@ -749,7 +748,6 @@ angular.module('BBAdmin.Controllers').controller('DashTimeList', function ($scop
 
     var k = void 0,
         slots = void 0;
-    var $loaded = null; // has somethign been loaded
 
     // Add a method that will be available in all retrieved CreditCard objects :
     $scope.init = function (day) {
@@ -852,7 +850,7 @@ angular.module('BBAdmin.Controllers').controller('DashTimeList', function ($scop
         var wHeight = $(window).height();
         var dHeight = wHeight * 0.8;
         var dlg = $("#dialog-modal");
-        var src = dlg.html('<iframe frameborder=0 id=\'mod_dlg\' onload=\'nowait();setTimeout(set_iframe_focus, 100);\' width=100% height=99% src=\'' + url + '\'></iframe>');
+        dlg.html('<iframe frameborder=0 id=\'mod_dlg\' onload=\'nowait();setTimeout(set_iframe_focus, 100);\' width=100% height=99% src=\'' + url + '\'></iframe>');
         dlg.attr("title", "Checkout");
         return dlg.dialog({
             my: "top", at: "top",
@@ -1384,7 +1382,6 @@ angular.module('BB.Models').factory("AdminBookingModel", function ($q, BBModel, 
             }
             if (_this.multi_status) {
                 for (var k in _this.multi_status) {
-                    var v = _this.multi_status[k];
                     _this.className += ' status_' + k;
                 }
             }
@@ -1880,7 +1877,6 @@ angular.module('BB.Models').factory("AdminSlotModel", function ($q, BBModel, Bas
             }
             if (_this.multi_status) {
                 for (var k in _this.multi_status) {
-                    var v = _this.multi_status[k];
                     _this.className += " status_" + k;
                 }
             }
@@ -2487,7 +2483,6 @@ angular.module('BBAdmin.Services').factory("AdminLoginService", function ($q, ha
             var url = $rootScope.bb.api_url + "/api/v1/login/sso/" + options['company_id'];
 
             halClient.$post(url, {}, data).then(function (login) {
-                var params = { auth_token: login.auth_token };
                 return login.$get('user').then(function (user) {
                     user = _this2.setLogin(user);
                     return deferred.resolve(user);
