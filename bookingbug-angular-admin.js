@@ -1428,54 +1428,6 @@
 }).call(this);
 
 (function() {
-  angular.module('BBAdmin.Controllers').controller('CompanyList', function($scope, $rootScope, $location) {
-    $scope.selectedCategory = null;
-    $rootScope.connection_started.then((function(_this) {
-      return function() {
-        var d, date, end, results;
-        date = moment();
-        $scope.current_date = date;
-        $scope.companies = $scope.bb.company.companies;
-        if (!$scope.companies || $scope.companies.length === 0) {
-          $scope.companies = [$scope.bb.company];
-        }
-        $scope.dates = [];
-        end = moment(date).add(21, 'days');
-        $scope.end_date = end;
-        d = moment(date);
-        results = [];
-        while (d.isBefore(end)) {
-          $scope.dates.push(d.clone());
-          results.push(d.add(1, 'days'));
-        }
-        return results;
-      };
-    })(this));
-    $scope.selectCompany = function(item) {
-      return window.location = "/view/dashboard/pick_company/" + item.id;
-    };
-    $scope.advance_date = function(num) {
-      var d, date, results;
-      date = $scope.current_date.add(num, 'days');
-      $scope.end_date = moment(date).add(21, 'days');
-      $scope.current_date = moment(date);
-      $scope.dates = [];
-      d = date.clone();
-      results = [];
-      while (d.isBefore($scope.end_date)) {
-        $scope.dates.push(d.clone());
-        results.push(d.add(1, 'days'));
-      }
-      return results;
-    };
-    return $scope.$on("Refresh_Comp", function(event, message) {
-      return $scope.$apply();
-    });
-  });
-
-}).call(this);
-
-(function() {
   angular.module('BBAdmin.Controllers').controller('DashboardContainer', function($scope, $rootScope, $location, $modal) {
     var ModalInstanceCtrl;
     $scope.selectedBooking = null;
@@ -2394,13 +2346,23 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 
       Admin_Booking.prototype.getPostData = function() {
         var data, q;
-        this.datetime = this.start.clone();
-        if (this.using_full_time) {
-          this.datetime.add(this.pre_time, 'minutes');
-        }
         data = {};
-        data.date = this.datetime.format("YYYY-MM-DD");
-        data.time = this.datetime.hour() * 60 + this.datetime.minute();
+        if (this.date && this.time) {
+          data.date = this.date.date.toISODate();
+          data.time = this.time.time;
+          if (this.time.event_id) {
+            data.event_id = this.time.event_id;
+          } else if (this.time.event_ids) {
+            data.event_ids = this.time.event_ids;
+          }
+        } else {
+          this.datetime = this.start.clone();
+          if (this.using_full_time) {
+            this.datetime.add(this.pre_time, 'minutes');
+          }
+          data.date = this.datetime.format("YYYY-MM-DD");
+          data.time = this.datetime.hour() * 60 + this.datetime.minute();
+        }
         data.duration = this.duration;
         data.id = this.id;
         data.pre_time = this.pre_time;
@@ -2654,7 +2616,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           if (prms.url) {
             url = prms.url;
           }
-          href = url + "/api/v1/admin/{company_id}/bookings{?slot_id,start_date,end_date,service_id,resource_id,person_id,page,per_page,include_cancelled,embed}";
+          href = url + "/api/v1/admin/{company_id}/bookings{?slot_id,start_date,end_date,service_id,resource_id,person_id,page,per_page,include_cancelled,embed,client_id}";
           uri = new UriTemplate(href).fillFromObject(prms || {});
           halClient.$get(uri, {}).then((function(_this) {
             return function(found) {
@@ -2679,12 +2641,16 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         return deferred.promise;
       },
       getBooking: function(prms) {
-        var deferred, href, uri;
+        var deferred, href, uri, url;
         deferred = $q.defer();
         if (prms.company && !prms.company_id) {
           prms.company_id = prms.company.id;
         }
-        href = "/api/v1/admin/{company_id}/bookings/{id}{?embed}";
+        url = "";
+        if (prms.url) {
+          url = prms.url;
+        }
+        href = url + "/api/v1/admin/{company_id}/bookings/{id}{?embed}";
         uri = new UriTemplate(href).fillFromObject(prms || {});
         halClient.$get(uri, {
           no_cache: true
@@ -2876,7 +2842,7 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
         if ($rootScope.bb.api_url) {
           url = $rootScope.bb.api_url;
         }
-        href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields}";
+        href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields,default_company_id}";
         uri = new UriTemplate(href).fillFromObject(prms || {});
         deferred = $q.defer();
         if (prms.flush) {
