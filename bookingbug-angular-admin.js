@@ -1337,6 +1337,7 @@ angular.module('BB.Models').factory("AdminBookingModel", function ($q, BBModel, 
 
             var _this = _possibleConstructorReturn(this, _BaseModel.apply(this, arguments));
 
+            _this.type = 'Admin_Booking';
             _this.datetime = moment(_this.datetime);
             _this.start = _this.datetime;
             _this.end = _this.end_datetime;
