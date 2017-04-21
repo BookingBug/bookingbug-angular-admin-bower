@@ -84,148 +84,6 @@ angular.module('BBAdmin.Services').run(function ($q, $injector, BBModel) {
 });
 'use strict';
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-window.Collection.Booking = function (_window$Collection$Ba) {
-    _inherits(Booking, _window$Collection$Ba);
-
-    function Booking() {
-        _classCallCheck(this, Booking);
-
-        return _possibleConstructorReturn(this, _window$Collection$Ba.apply(this, arguments));
-    }
-
-    Booking.prototype.checkItem = function checkItem(item) {
-        var _window$Collection$Ba2;
-
-        return (_window$Collection$Ba2 = _window$Collection$Ba.prototype.checkItem).call.apply(_window$Collection$Ba2, [this].concat(Array.prototype.slice.call(arguments)));
-    };
-
-    Booking.prototype.matchesParams = function matchesParams(item) {
-        if (this.params.start_date != null && item.start) {
-            if (this.start_date == null) {
-                this.start_date = moment(this.params.start_date);
-            }
-            if (this.start_date.isAfter(item.start)) {
-                return false;
-            }
-        }
-        if (this.params.end_date != null && item.start) {
-            if (this.end_date == null) {
-                this.end_date = moment(this.params.end_date);
-            }
-            if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
-                return false;
-            }
-        }
-        if (!this.params.include_cancelled && item.is_cancelled) {
-            return false;
-        }
-        return true;
-    };
-
-    return Booking;
-}(window.Collection.Base);
-
-angular.module('BB.Services').provider("BookingCollections", function () {
-    return {
-        $get: function $get() {
-            return new window.BaseCollections();
-        }
-    };
-});
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-window.Collection.Client = function (_window$Collection$Ba) {
-    _inherits(Client, _window$Collection$Ba);
-
-    function Client() {
-        _classCallCheck(this, Client);
-
-        return _possibleConstructorReturn(this, _window$Collection$Ba.apply(this, arguments));
-    }
-
-    Client.prototype.checkItem = function checkItem(item) {
-        var _window$Collection$Ba2;
-
-        return (_window$Collection$Ba2 = _window$Collection$Ba.prototype.checkItem).call.apply(_window$Collection$Ba2, [this].concat(Array.prototype.slice.call(arguments)));
-    };
-
-    return Client;
-}(window.Collection.Base);
-
-angular.module('BB.Services').provider("ClientCollections", function () {
-    return {
-        $get: function $get() {
-            return new window.BaseCollections();
-        }
-    };
-});
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-window.Collection.Slot = function (_window$Collection$Ba) {
-    _inherits(Slot, _window$Collection$Ba);
-
-    function Slot() {
-        _classCallCheck(this, Slot);
-
-        return _possibleConstructorReturn(this, _window$Collection$Ba.apply(this, arguments));
-    }
-
-    Slot.prototype.checkItem = function checkItem(item) {
-        var _window$Collection$Ba2;
-
-        return (_window$Collection$Ba2 = _window$Collection$Ba.prototype.checkItem).call.apply(_window$Collection$Ba2, [this].concat(Array.prototype.slice.call(arguments)));
-    };
-
-    Slot.prototype.matchesParams = function matchesParams(item) {
-        if (this.params.start_date) {
-            if (!this.start_date) {
-                this.start_date = moment(this.params.start_date);
-            }
-            if (this.start_date.isAfter(item.date)) {
-                return false;
-            }
-        }
-        if (this.params.end_date) {
-            if (!this.end_date) {
-                this.end_date = moment(this.params.end_date);
-            }
-            if (this.end_date.isBefore(item.date)) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    return Slot;
-}(window.Collection.Base);
-
-angular.module('BB.Services').provider("SlotCollections", function () {
-    return {
-        $get: function $get() {
-            return new window.BaseCollections();
-        }
-    };
-});
-'use strict';
-
 angular.module('BBAdmin.Controllers').controller('CalendarCtrl', function ($scope, BBModel, $rootScope) {
 
     $scope.eventsF = function (start, end, tz, callback) {
@@ -869,6 +727,148 @@ angular.module('BBAdmin.Controllers').controller('TimeOptions', function ($scope
 });
 'use strict';
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+window.Collection.Booking = function (_window$Collection$Ba) {
+    _inherits(Booking, _window$Collection$Ba);
+
+    function Booking() {
+        _classCallCheck(this, Booking);
+
+        return _possibleConstructorReturn(this, _window$Collection$Ba.apply(this, arguments));
+    }
+
+    Booking.prototype.checkItem = function checkItem(item) {
+        var _window$Collection$Ba2;
+
+        return (_window$Collection$Ba2 = _window$Collection$Ba.prototype.checkItem).call.apply(_window$Collection$Ba2, [this].concat(Array.prototype.slice.call(arguments)));
+    };
+
+    Booking.prototype.matchesParams = function matchesParams(item) {
+        if (this.params.start_date != null && item.start) {
+            if (this.start_date == null) {
+                this.start_date = moment(this.params.start_date);
+            }
+            if (this.start_date.isAfter(item.start)) {
+                return false;
+            }
+        }
+        if (this.params.end_date != null && item.start) {
+            if (this.end_date == null) {
+                this.end_date = moment(this.params.end_date);
+            }
+            if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
+                return false;
+            }
+        }
+        if (!this.params.include_cancelled && item.is_cancelled) {
+            return false;
+        }
+        return true;
+    };
+
+    return Booking;
+}(window.Collection.Base);
+
+angular.module('BB.Services').provider("BookingCollections", function () {
+    return {
+        $get: function $get() {
+            return new window.BaseCollections();
+        }
+    };
+});
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+window.Collection.Client = function (_window$Collection$Ba) {
+    _inherits(Client, _window$Collection$Ba);
+
+    function Client() {
+        _classCallCheck(this, Client);
+
+        return _possibleConstructorReturn(this, _window$Collection$Ba.apply(this, arguments));
+    }
+
+    Client.prototype.checkItem = function checkItem(item) {
+        var _window$Collection$Ba2;
+
+        return (_window$Collection$Ba2 = _window$Collection$Ba.prototype.checkItem).call.apply(_window$Collection$Ba2, [this].concat(Array.prototype.slice.call(arguments)));
+    };
+
+    return Client;
+}(window.Collection.Base);
+
+angular.module('BB.Services').provider("ClientCollections", function () {
+    return {
+        $get: function $get() {
+            return new window.BaseCollections();
+        }
+    };
+});
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+window.Collection.Slot = function (_window$Collection$Ba) {
+    _inherits(Slot, _window$Collection$Ba);
+
+    function Slot() {
+        _classCallCheck(this, Slot);
+
+        return _possibleConstructorReturn(this, _window$Collection$Ba.apply(this, arguments));
+    }
+
+    Slot.prototype.checkItem = function checkItem(item) {
+        var _window$Collection$Ba2;
+
+        return (_window$Collection$Ba2 = _window$Collection$Ba.prototype.checkItem).call.apply(_window$Collection$Ba2, [this].concat(Array.prototype.slice.call(arguments)));
+    };
+
+    Slot.prototype.matchesParams = function matchesParams(item) {
+        if (this.params.start_date) {
+            if (!this.start_date) {
+                this.start_date = moment(this.params.start_date);
+            }
+            if (this.start_date.isAfter(item.date)) {
+                return false;
+            }
+        }
+        if (this.params.end_date) {
+            if (!this.end_date) {
+                this.end_date = moment(this.params.end_date);
+            }
+            if (this.end_date.isBefore(item.date)) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    return Slot;
+}(window.Collection.Base);
+
+angular.module('BB.Services').provider("SlotCollections", function () {
+    return {
+        $get: function $get() {
+            return new window.BaseCollections();
+        }
+    };
+});
+'use strict';
+
 angular.module('BBAdmin.Directives').directive('adminLogin', function ($uibModal, $log, $rootScope, $q, $document, BBModel) {
 
     var loginAdminController = function loginAdminController($scope, $uibModalInstance, company_id) {
@@ -1298,646 +1298,6 @@ angular.module('BBAdmin').filter('time', function ($window) {
     return function (v) {
         return $window.sprintf("%02d:%02d", Math.floor(v / 60), v % 60);
     };
-});
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-angular.module('BB.Models').factory("AdminAdministratorModel", function ($q, BBModel, BaseModel) {
-  return function (_BaseModel) {
-    _inherits(Administrator, _BaseModel);
-
-    function Administrator() {
-      _classCallCheck(this, Administrator);
-
-      return _possibleConstructorReturn(this, _BaseModel.apply(this, arguments));
-    }
-
-    return Administrator;
-  }(BaseModel);
-});
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-angular.module('BB.Models').factory("AdminBookingModel", function ($q, BBModel, BaseModel, BookingCollections, $window) {
-    return function (_BaseModel) {
-        _inherits(Admin_Booking, _BaseModel);
-
-        function Admin_Booking(data) {
-            _classCallCheck(this, Admin_Booking);
-
-            var _this = _possibleConstructorReturn(this, _BaseModel.apply(this, arguments));
-
-            _this.datetime = moment(_this.datetime);
-            _this.start = _this.datetime;
-            _this.end = _this.end_datetime;
-            if (!_this.end) {
-                _this.end = _this.datetime.clone().add(_this.duration, 'minutes');
-            }
-            _this.title = _this.full_describe;
-            _this.time = _this.start.hour() * 60 + _this.start.minute();
-            //      @startEditable  = false
-            //      @durationEditable  = false
-            // set to all day if it's a 24 hours span
-            _this.allDay = false;
-            if (_this.duration_span && _this.duration_span === 86400) {
-                _this.allDay = true;
-            }
-            if (_this.status === 3) {
-                _this.startEditable = true;
-                _this.durationEditable = true;
-                _this.className = "status_blocked";
-            } else if (_this.status === 4) {
-                _this.className = "status_booked";
-            } else if (_this.status === 0) {
-                _this.className = "status_available";
-            }
-            if (_this.multi_status) {
-                for (var k in _this.multi_status) {
-                    _this.className += ' status_' + k;
-                }
-            }
-            return _this;
-        }
-
-        Admin_Booking.prototype.useFullTime = function useFullTime() {
-            this.using_full_time = true;
-            if (this.pre_time) {
-                this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
-            }
-            if (this.post_time) {
-                return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
-            }
-        };
-
-        Admin_Booking.prototype.getPostData = function getPostData() {
-            var data = {};
-            if (this.date && this.time) {
-                data.date = this.date.date.toISODate();
-                data.time = this.time.time;
-                if (this.time.event_id) {
-                    data.event_id = this.time.event_id;
-                } else if (this.time.event_ids) {
-                    // what's this about?
-                    data.event_ids = this.time.event_ids;
-                }
-            } else {
-                this.datetime = this.start.clone();
-                if (this.using_full_time) {
-                    // we need to make sure if @start has changed - that we're adjusting for a possible pre-time
-                    this.datetime.add(this.pre_time, 'minutes');
-                }
-                data.date = this.datetime.format("YYYY-MM-DD");
-                data.time = this.datetime.hour() * 60 + this.datetime.minute();
-            }
-            data.duration = this.duration;
-            data.id = this.id;
-            data.pre_time = this.pre_time;
-            data.post_time = this.post_time;
-            data.person_id = this.person_id;
-            data.resource_id = this.resource_id;
-            data.child_client_ids = this.child_client_ids;
-            data.people_ids = this.people_ids;
-            if (this.questions) {
-                data.questions = Array.from(this.questions).map(function (q) {
-                    return q.getPostData();
-                });
-            }
-            return data;
-        };
-
-        Admin_Booking.prototype.hasStatus = function hasStatus(status) {
-            return this.multi_status[status] != null;
-        };
-
-        Admin_Booking.prototype.statusTime = function statusTime(status) {
-            if (this.multi_status[status]) {
-                return moment(this.multi_status[status]);
-            } else {
-                return null;
-            }
-        };
-
-        Admin_Booking.prototype.sinceStatus = function sinceStatus(status) {
-            var s = this.statusTime(status);
-            if (!s) {
-                return 0;
-            }
-            return Math.floor((moment().unix() - s.unix()) / 60);
-        };
-
-        Admin_Booking.prototype.sinceStart = function sinceStart(options) {
-            var s = void 0;
-            var start = this.datetime.unix();
-            if (!options) {
-                return Math.floor((moment().unix() - start) / 60);
-            }
-            if (options.later) {
-                s = this.statusTime(options.later).unix();
-                if (s > start) {
-                    return Math.floor((moment().unix() - s) / 60);
-                }
-            }
-            if (options.earlier) {
-                s = this.statusTime(options.earlier).unix();
-                if (s < start) {
-                    return Math.floor((moment().unix() - s) / 60);
-                }
-            }
-            return Math.floor((moment().unix() - start) / 60);
-        };
-
-        Admin_Booking.prototype.answer = function answer(q) {
-            if (this.answers_summary) {
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = Array.from(this.answers_summary)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var a = _step.value;
-
-                        if (a.name === q) {
-                            return a.answer;
-                        }
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
-                }
-            }
-            return null;
-        };
-
-        Admin_Booking.prototype.$update = function $update(data) {
-            var _this2 = this;
-
-            var defer = $q.defer();
-            if (data) {
-                data.datetime = moment(data.datetime);
-                data.datetime.tz();
-                data.datetime = data.datetime.format();
-            }
-            if (!data) {
-                data = this.getPostData();
-            }
-            this.$put('self', {}, data).then(function (res) {
-                _this2.constructor(res);
-                if (_this2.using_full_time) {
-                    _this2.useFullTime();
-                }
-                BookingCollections.checkItems(_this2);
-                return defer.resolve(_this2);
-            }, function (err) {
-                return defer.reject(err);
-            });
-            return defer.promise;
-        };
-
-        Admin_Booking.prototype.$refetch = function $refetch() {
-            var _this3 = this;
-
-            var defer = $q.defer();
-            this.$flush('self');
-            this.$get('self').then(function (res) {
-                _this3.constructor(res);
-                if (_this3.using_full_time) {
-                    _this3.useFullTime();
-                }
-                BookingCollections.checkItems(_this3);
-                return defer.resolve(_this3);
-            }, function (err) {
-                return defer.reject(err);
-            });
-            return defer.promise;
-        };
-
-        Admin_Booking.$query = function $query(params) {
-            var company = void 0;
-            if (params.slot) {
-                params.slot_id = params.slot.id;
-            }
-            if (params.date) {
-                params.start_date = params.date;
-                params.end_date = params.date;
-            }
-            if (params.company) {
-                company = params.company;
-
-                delete params.company;
-                params.company_id = company.id;
-            }
-            if (params.per_page == null) {
-                params.per_page = 1024;
-            }
-            if (params.include_cancelled == null) {
-                params.include_cancelled = false;
-            }
-            var defer = $q.defer();
-            var existing = BookingCollections.find(params);
-            if (existing && !params.skip_cache) {
-                defer.resolve(existing);
-            } else {
-                var src = company;
-                if (!src) {
-                    src = params.src;
-                }
-                if (params.src) {
-                    delete params.src;
-                }
-                if (params.skip_cache) {
-                    if (existing) {
-                        BookingCollections.delete(existing);
-                    }
-                    src.$flush('bookings', params);
-                }
-
-                src.$get('bookings', params).then(function (resource) {
-                    if (resource.$has('bookings')) {
-                        return resource.$get('bookings').then(function (bookings) {
-                            var models = Array.from(bookings).map(function (b) {
-                                return new BBModel.Admin.Booking(b);
-                            });
-                            var spaces = new $window.Collection.Booking(resource, models, params);
-                            BookingCollections.add(spaces);
-                            return defer.resolve(spaces);
-                        }, function (err) {
-                            return defer.reject(err);
-                        });
-                    } else {
-                        var booking = new BBModel.Admin.Booking(resource);
-                        return defer.resolve(booking);
-                    }
-                }, function (err) {
-                    return defer.reject(err);
-                });
-            }
-            return defer.promise;
-        };
-
-        return Admin_Booking;
-    }(BaseModel);
-});
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-angular.module('BB.Models').factory("AdminClientModel", function (ClientModel, $q, BBModel, $log, $window, ClientCollections, $rootScope, UriTemplate, halClient) {
-    return function (_ClientModel) {
-        _inherits(Admin_Client, _ClientModel);
-
-        function Admin_Client(data) {
-            _classCallCheck(this, Admin_Client);
-
-            return _possibleConstructorReturn(this, _ClientModel.call(this, data));
-        }
-
-        Admin_Client.$query = function $query(params) {
-            var company = params.company;
-
-            var defer = $q.defer();
-
-            if (company.$has('client')) {
-
-                //if params.flush
-                //  company.$flush('client', params)
-
-                // have to use a hard coded api ref for now until all servers also have the {/id} in the href
-
-                var url = "";
-                if ($rootScope.bb.api_url) {
-                    url = $rootScope.bb.api_url;
-                }
-                var href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields,default_company_id}";
-                params.company_id = company.id;
-                var uri = new UriTemplate(href).fillFromObject(params || {});
-
-                if (params.flush) {
-                    halClient.clearCache(uri);
-                }
-
-                //company.$get('client', params).then (resource) ->
-                halClient.$get(uri, {}).then(function (resource) {
-                    if (resource.$has('clients')) {
-                        return resource.$get('clients').then(function (clients) {
-                            var models = Array.from(clients).map(function (c) {
-                                return new BBModel.Admin.Client(c);
-                            });
-
-                            clients = new $window.Collection.Client(resource, models, params);
-                            clients.total_entries = resource.total_entries;
-                            ClientCollections.add(clients);
-                            return defer.resolve(clients);
-                        }, function (err) {
-                            return defer.reject(err);
-                        });
-                    } else {
-                        var client = new BBModel.Admin.Client(resource);
-                        return defer.resolve(client);
-                    }
-                }, function (err) {
-                    return defer.reject(err);
-                });
-            } else {
-                $log.warn('company has no client link');
-                defer.reject('company has no client link');
-            }
-            return defer.promise;
-        };
-
-        return Admin_Client;
-    }(ClientModel);
-});
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-angular.module('BB.Models').factory("AdminCompanyModel", function (CompanyModel, AdminCompanyService, BookingCollections, $q, BBModel) {
-    return function (_CompanyModel) {
-        _inherits(Admin_Company, _CompanyModel);
-
-        function Admin_Company(data) {
-            _classCallCheck(this, Admin_Company);
-
-            return _possibleConstructorReturn(this, _CompanyModel.call(this, data));
-        }
-
-        Admin_Company.prototype.getBooking = function getBooking(id) {
-            var defer = $q.defer();
-            this.$get('bookings', { id: id }).then(function (booking) {
-                var model = new BBModel.Admin.Booking(booking);
-                BookingCollections.checkItems(model);
-                return defer.resolve(model);
-            }, function (err) {
-                return defer.reject(err);
-            });
-            return defer.promise;
-        };
-
-        Admin_Company.$query = function $query(params) {
-            return AdminCompanyService.query(params);
-        };
-
-        return Admin_Company;
-    }(CompanyModel);
-});
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-angular.module('BB.Models').factory("AdminLoginModel", function ($q, AdminLoginService, BBModel, BaseModel) {
-    return function (_BaseModel) {
-        _inherits(Admin_Login, _BaseModel);
-
-        function Admin_Login(data) {
-            _classCallCheck(this, Admin_Login);
-
-            return _possibleConstructorReturn(this, _BaseModel.call(this, data));
-        }
-
-        Admin_Login.$login = function $login(form, options) {
-            return AdminLoginService.login(form, options);
-        };
-
-        Admin_Login.$ssoLogin = function $ssoLogin(options, data) {
-            return AdminLoginService.ssoLogin(options, data);
-        };
-
-        Admin_Login.$isLoggedIn = function $isLoggedIn() {
-            return AdminLoginService.isLoggedIn();
-        };
-
-        Admin_Login.$setLogin = function $setLogin(user) {
-            return AdminLoginService.setLogin(user);
-        };
-
-        Admin_Login.$user = function $user() {
-            return AdminLoginService.user();
-        };
-
-        Admin_Login.$checkLogin = function $checkLogin(params) {
-            return AdminLoginService.checkLogin(params);
-        };
-
-        Admin_Login.$logout = function $logout() {
-            return AdminLoginService.logout();
-        };
-
-        Admin_Login.$getLogin = function $getLogin(options) {
-            return AdminLoginService.getLogin(options);
-        };
-
-        Admin_Login.$companyLogin = function $companyLogin(company, params) {
-            return AdminLoginService.companyLogin(company, params);
-        };
-
-        Admin_Login.$memberQuery = function $memberQuery(params) {
-            return AdminLoginService.memberQuery(params);
-        };
-
-        Admin_Login.$setCompany = function $setCompany(company_id) {
-            return AdminLoginService.setCompany(company_id);
-        };
-
-        return Admin_Login;
-    }(BaseModel);
-});
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-angular.module('BB.Models').factory("AdminSlotModel", function ($q, BBModel, BaseModel, TimeSlotModel, SlotCollections, $window) {
-    return function (_TimeSlotModel) {
-        _inherits(Admin_Slot, _TimeSlotModel);
-
-        function Admin_Slot(data) {
-            _classCallCheck(this, Admin_Slot);
-
-            var _this = _possibleConstructorReturn(this, _TimeSlotModel.call(this, data));
-
-            _this.title = _this.full_describe;
-            if (_this.status === 0) {
-                _this.title = "Available";
-            }
-            _this.datetime = moment(_this.datetime);
-            _this.start = _this.datetime;
-            _this.end = _this.end_datetime;
-            _this.end = _this.datetime.clone().add(_this.duration, 'minutes');
-            _this.time = _this.start.hour() * 60 + _this.start.minute();
-            _this.title = _this.full_describe;
-            //   @startEditable  = false
-            //   @durationEditable  = false
-            // set to all day if it's a 24 hours span
-            _this.allDay = false;
-            if (_this.duration_span && _this.duration_span === 86400) {
-                _this.allDay = true;
-            }
-            if (_this.status === 3) {
-                _this.startEditable = true;
-                _this.durationEditable = true;
-                _this.className = "status_blocked";
-            } else if (_this.status === 4) {
-                _this.className = "status_booked";
-            } else if (_this.status === 0) {
-                _this.className = "status_available";
-            }
-            if (_this.multi_status) {
-                for (var k in _this.multi_status) {
-                    _this.className += " status_" + k;
-                }
-            }
-            return _this;
-        }
-
-        Admin_Slot.prototype.useFullTime = function useFullTime() {
-            this.using_full_time = true;
-            if (this.pre_time) {
-                this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
-            }
-            if (this.post_time) {
-                return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
-            }
-        };
-
-        Admin_Slot.prototype.$refetch = function $refetch() {
-            var _this2 = this;
-
-            var defer = $q.defer();
-            this.$flush('self');
-            this.$get('self').then(function (res) {
-                _this2.constructor(res);
-                if (_this2.using_full_time) {
-                    _this2.useFullTime();
-                }
-                BookingCollections.checkItems(_this2);
-                return defer.resolve(_this2);
-            }, function (err) {
-                return defer.reject(err);
-            });
-            return defer.promise;
-        };
-
-        Admin_Slot.$query = function $query(params) {
-            var company = void 0;
-            if (params.slot) {
-                params.slot_id = params.slot.id;
-            }
-            if (params.date) {
-                params.start_date = params.date;
-                params.end_date = params.date;
-            }
-            if (params.company) {
-                company = params.company;
-
-                delete params.company;
-                params.company_id = company.id;
-            }
-            if (params.per_page == null) {
-                params.per_page = 1024;
-            }
-            if (params.include_cancelled == null) {
-                params.include_cancelled = false;
-            }
-            var defer = $q.defer();
-            var existing = SlotCollections.find(params);
-            if (existing && !params.skip_cache) {
-                defer.resolve(existing);
-            } else {
-                var src = company;
-                if (!src) {
-                    src = params.src;
-                }
-                if (params.src) {
-                    delete params.src;
-                }
-                if (params.skip_cache) {
-                    if (existing) {
-                        SlotCollections.delete(existing);
-                    }
-                    src.$flush('slots', params);
-                }
-
-                src.$get('slots', params).then(function (resource) {
-                    if (resource.$has('slots')) {
-                        return resource.$get('slots').then(function (slots) {
-                            var models = Array.from(slots).map(function (b) {
-                                return new BBModel.Admin.Slot(b);
-                            });
-                            var spaces = new $window.Collection.Slot(resource, models, params);
-                            SlotCollections.add(spaces);
-                            return defer.resolve(spaces);
-                        }, function (err) {
-                            return defer.reject(err);
-                        });
-                    } else {
-                        var slot = new BBModel.Admin.Slot(resource);
-                        return defer.resolve(slot);
-                    }
-                }, function (err) {
-                    return defer.reject(err);
-                });
-            }
-            return defer.promise;
-        };
-
-        return Admin_Slot;
-    }(TimeSlotModel);
-});
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-angular.module('BB.Models').factory("AdminUserModel", function ($q, BBModel, BaseModel) {
-  return function (_BaseModel) {
-    _inherits(User, _BaseModel);
-
-    function User() {
-      _classCallCheck(this, User);
-
-      return _possibleConstructorReturn(this, _BaseModel.apply(this, arguments));
-    }
-
-    return User;
-  }(BaseModel);
 });
 'use strict';
 
@@ -2883,4 +2243,645 @@ angular.module("BBAdmin").config(function ($translateProvider) {
     };
 
     $translateProvider.translations("en", translations);
+});
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+angular.module('BB.Models').factory("AdminAdministratorModel", function ($q, BBModel, BaseModel) {
+  return function (_BaseModel) {
+    _inherits(Administrator, _BaseModel);
+
+    function Administrator() {
+      _classCallCheck(this, Administrator);
+
+      return _possibleConstructorReturn(this, _BaseModel.apply(this, arguments));
+    }
+
+    return Administrator;
+  }(BaseModel);
+});
+'use strict';
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+angular.module('BB.Models').factory("AdminBookingModel", function ($q, BBModel, BaseModel, BookingCollections, $window) {
+    return function (_BaseModel) {
+        _inherits(Admin_Booking, _BaseModel);
+
+        function Admin_Booking(data) {
+            _classCallCheck(this, Admin_Booking);
+
+            var _this = _possibleConstructorReturn(this, _BaseModel.apply(this, arguments));
+
+            _this.type = 'Admin_Booking';
+            _this.datetime = moment(_this.datetime);
+            _this.start = _this.datetime;
+            _this.end = _this.end_datetime;
+            if (!_this.end) {
+                _this.end = _this.datetime.clone().add(_this.duration, 'minutes');
+            }
+            _this.title = _this.full_describe;
+            _this.time = _this.start.hour() * 60 + _this.start.minute();
+            //      @startEditable  = false
+            //      @durationEditable  = false
+            // set to all day if it's a 24 hours span
+            _this.allDay = false;
+            if (_this.duration_span && _this.duration_span === 86400) {
+                _this.allDay = true;
+            }
+            if (_this.status === 3) {
+                _this.startEditable = true;
+                _this.durationEditable = true;
+                _this.className = "status_blocked";
+            } else if (_this.status === 4) {
+                _this.className = "status_booked";
+            } else if (_this.status === 0) {
+                _this.className = "status_available";
+            }
+            if (_this.multi_status) {
+                for (var k in _this.multi_status) {
+                    _this.className += ' status_' + k;
+                }
+            }
+            return _this;
+        }
+
+        Admin_Booking.prototype.useFullTime = function useFullTime() {
+            this.using_full_time = true;
+            if (this.pre_time) {
+                this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
+            }
+            if (this.post_time) {
+                return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
+            }
+        };
+
+        Admin_Booking.prototype.getPostData = function getPostData() {
+            var data = {};
+            if (this.date && this.time) {
+                data.date = this.date.date.toISODate();
+                data.time = this.time.time;
+                if (this.time.event_id) {
+                    data.event_id = this.time.event_id;
+                } else if (this.time.event_ids) {
+                    // what's this about?
+                    data.event_ids = this.time.event_ids;
+                }
+            } else {
+                this.datetime = this.start.clone();
+                if (this.using_full_time) {
+                    // we need to make sure if @start has changed - that we're adjusting for a possible pre-time
+                    this.datetime.add(this.pre_time, 'minutes');
+                }
+                data.date = this.datetime.format("YYYY-MM-DD");
+                data.time = this.datetime.hour() * 60 + this.datetime.minute();
+            }
+            data.duration = this.duration;
+            data.id = this.id;
+            data.pre_time = this.pre_time;
+            data.post_time = this.post_time;
+            data.person_id = this.person_id;
+            data.resource_id = this.resource_id;
+            data.child_client_ids = this.child_client_ids;
+            data.people_ids = this.people_ids;
+            if (this.questions) {
+                data.questions = Array.from(this.questions).map(function (q) {
+                    return q.getPostData();
+                });
+            }
+            return data;
+        };
+
+        Admin_Booking.prototype.hasStatus = function hasStatus(status) {
+            return this.multi_status[status] != null;
+        };
+
+        Admin_Booking.prototype.statusTime = function statusTime(status) {
+            if (this.multi_status[status]) {
+                return moment(this.multi_status[status]);
+            } else {
+                return null;
+            }
+        };
+
+        Admin_Booking.prototype.sinceStatus = function sinceStatus(status) {
+            var s = this.statusTime(status);
+            if (!s) {
+                return 0;
+            }
+            return Math.floor((moment().unix() - s.unix()) / 60);
+        };
+
+        Admin_Booking.prototype.sinceStart = function sinceStart(options) {
+            var s = void 0;
+            var start = this.datetime.unix();
+            if (!options) {
+                return Math.floor((moment().unix() - start) / 60);
+            }
+            if (options.later) {
+                s = this.statusTime(options.later).unix();
+                if (s > start) {
+                    return Math.floor((moment().unix() - s) / 60);
+                }
+            }
+            if (options.earlier) {
+                s = this.statusTime(options.earlier).unix();
+                if (s < start) {
+                    return Math.floor((moment().unix() - s) / 60);
+                }
+            }
+            return Math.floor((moment().unix() - start) / 60);
+        };
+
+        Admin_Booking.prototype.answer = function answer(q) {
+            if (this.answers_summary) {
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
+
+                try {
+                    for (var _iterator = Array.from(this.answers_summary)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var a = _step.value;
+
+                        if (a.name === q) {
+                            return a.answer;
+                        }
+                    }
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
+                }
+            }
+            return null;
+        };
+
+        Admin_Booking.prototype.$update = function $update(data) {
+            var _this2 = this;
+
+            var defer = $q.defer();
+            if (data) {
+                data.datetime = moment(data.datetime);
+                data.datetime.tz();
+                data.datetime = data.datetime.format();
+            }
+            if (!data) {
+                data = this.getPostData();
+            }
+            this.$put('self', {}, data).then(function (res) {
+                _this2.constructor(res);
+                if (_this2.using_full_time) {
+                    _this2.useFullTime();
+                }
+                BookingCollections.checkItems(_this2);
+                return defer.resolve(_this2);
+            }, function (err) {
+                return defer.reject(err);
+            });
+            return defer.promise;
+        };
+
+        Admin_Booking.prototype.$refetch = function $refetch() {
+            var _this3 = this;
+
+            var defer = $q.defer();
+            this.$flush('self');
+            this.$get('self').then(function (res) {
+                _this3.constructor(res);
+                if (_this3.using_full_time) {
+                    _this3.useFullTime();
+                }
+                BookingCollections.checkItems(_this3);
+                return defer.resolve(_this3);
+            }, function (err) {
+                return defer.reject(err);
+            });
+            return defer.promise;
+        };
+
+        Admin_Booking.$query = function $query(params) {
+            var company = void 0;
+            if (params.slot) {
+                params.slot_id = params.slot.id;
+            }
+            if (params.date) {
+                params.start_date = params.date;
+                params.end_date = params.date;
+            }
+            if (params.company) {
+                company = params.company;
+
+                delete params.company;
+                params.company_id = company.id;
+            }
+            if (params.per_page == null) {
+                params.per_page = 1024;
+            }
+            if (params.include_cancelled == null) {
+                params.include_cancelled = false;
+            }
+            var defer = $q.defer();
+            var existing = BookingCollections.find(params);
+            if (existing && !params.skip_cache) {
+                defer.resolve(existing);
+            } else {
+                var src = company;
+                if (!src) {
+                    src = params.src;
+                }
+                if (params.src) {
+                    delete params.src;
+                }
+                if (params.skip_cache) {
+                    if (existing) {
+                        BookingCollections.delete(existing);
+                    }
+                    src.$flush('bookings', params);
+                }
+
+                src.$get('bookings', params).then(function (resource) {
+                    if (resource.$has('bookings')) {
+                        return resource.$get('bookings').then(function (bookings) {
+                            var models = Array.from(bookings).map(function (b) {
+                                return new BBModel.Admin.Booking(b);
+                            });
+                            var spaces = new $window.Collection.Booking(resource, models, params);
+                            BookingCollections.add(spaces);
+                            return defer.resolve(spaces);
+                        }, function (err) {
+                            return defer.reject(err);
+                        });
+                    } else {
+                        var booking = new BBModel.Admin.Booking(resource);
+                        return defer.resolve(booking);
+                    }
+                }, function (err) {
+                    return defer.reject(err);
+                });
+            }
+            return defer.promise;
+        };
+
+        return Admin_Booking;
+    }(BaseModel);
+});
+'use strict';
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+angular.module('BB.Models').factory("AdminClientModel", function (ClientModel, $q, BBModel, $log, $window, ClientCollections, $rootScope, UriTemplate, halClient) {
+    return function (_ClientModel) {
+        _inherits(Admin_Client, _ClientModel);
+
+        function Admin_Client(data) {
+            _classCallCheck(this, Admin_Client);
+
+            return _possibleConstructorReturn(this, _ClientModel.call(this, data));
+        }
+
+        Admin_Client.$query = function $query(params) {
+            var company = params.company;
+
+            var defer = $q.defer();
+
+            if (company.$has('client')) {
+
+                //if params.flush
+                //  company.$flush('client', params)
+
+                // have to use a hard coded api ref for now until all servers also have the {/id} in the href
+
+                var url = "";
+                if ($rootScope.bb.api_url) {
+                    url = $rootScope.bb.api_url;
+                }
+                var href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields,default_company_id}";
+                params.company_id = company.id;
+                var uri = new UriTemplate(href).fillFromObject(params || {});
+
+                if (params.flush) {
+                    halClient.clearCache(uri);
+                }
+
+                //company.$get('client', params).then (resource) ->
+                halClient.$get(uri, {}).then(function (resource) {
+                    if (resource.$has('clients')) {
+                        return resource.$get('clients').then(function (clients) {
+                            var models = Array.from(clients).map(function (c) {
+                                return new BBModel.Admin.Client(c);
+                            });
+
+                            clients = new $window.Collection.Client(resource, models, params);
+                            clients.total_entries = resource.total_entries;
+                            ClientCollections.add(clients);
+                            return defer.resolve(clients);
+                        }, function (err) {
+                            return defer.reject(err);
+                        });
+                    } else {
+                        var client = new BBModel.Admin.Client(resource);
+                        return defer.resolve(client);
+                    }
+                }, function (err) {
+                    return defer.reject(err);
+                });
+            } else {
+                $log.warn('company has no client link');
+                defer.reject('company has no client link');
+            }
+            return defer.promise;
+        };
+
+        return Admin_Client;
+    }(ClientModel);
+});
+'use strict';
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+angular.module('BB.Models').factory("AdminCompanyModel", function (CompanyModel, AdminCompanyService, BookingCollections, $q, BBModel) {
+    return function (_CompanyModel) {
+        _inherits(Admin_Company, _CompanyModel);
+
+        function Admin_Company(data) {
+            _classCallCheck(this, Admin_Company);
+
+            return _possibleConstructorReturn(this, _CompanyModel.call(this, data));
+        }
+
+        Admin_Company.prototype.getBooking = function getBooking(id) {
+            var defer = $q.defer();
+            this.$get('bookings', { id: id }).then(function (booking) {
+                var model = new BBModel.Admin.Booking(booking);
+                BookingCollections.checkItems(model);
+                return defer.resolve(model);
+            }, function (err) {
+                return defer.reject(err);
+            });
+            return defer.promise;
+        };
+
+        Admin_Company.$query = function $query(params) {
+            return AdminCompanyService.query(params);
+        };
+
+        return Admin_Company;
+    }(CompanyModel);
+});
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+angular.module('BB.Models').factory("AdminLoginModel", function ($q, AdminLoginService, BBModel, BaseModel) {
+    return function (_BaseModel) {
+        _inherits(Admin_Login, _BaseModel);
+
+        function Admin_Login(data) {
+            _classCallCheck(this, Admin_Login);
+
+            return _possibleConstructorReturn(this, _BaseModel.call(this, data));
+        }
+
+        Admin_Login.$login = function $login(form, options) {
+            return AdminLoginService.login(form, options);
+        };
+
+        Admin_Login.$ssoLogin = function $ssoLogin(options, data) {
+            return AdminLoginService.ssoLogin(options, data);
+        };
+
+        Admin_Login.$isLoggedIn = function $isLoggedIn() {
+            return AdminLoginService.isLoggedIn();
+        };
+
+        Admin_Login.$setLogin = function $setLogin(user) {
+            return AdminLoginService.setLogin(user);
+        };
+
+        Admin_Login.$user = function $user() {
+            return AdminLoginService.user();
+        };
+
+        Admin_Login.$checkLogin = function $checkLogin(params) {
+            return AdminLoginService.checkLogin(params);
+        };
+
+        Admin_Login.$logout = function $logout() {
+            return AdminLoginService.logout();
+        };
+
+        Admin_Login.$getLogin = function $getLogin(options) {
+            return AdminLoginService.getLogin(options);
+        };
+
+        Admin_Login.$companyLogin = function $companyLogin(company, params) {
+            return AdminLoginService.companyLogin(company, params);
+        };
+
+        Admin_Login.$memberQuery = function $memberQuery(params) {
+            return AdminLoginService.memberQuery(params);
+        };
+
+        Admin_Login.$setCompany = function $setCompany(company_id) {
+            return AdminLoginService.setCompany(company_id);
+        };
+
+        return Admin_Login;
+    }(BaseModel);
+});
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+angular.module('BB.Models').factory("AdminSlotModel", function ($q, BBModel, BaseModel, TimeSlotModel, SlotCollections, $window) {
+    return function (_TimeSlotModel) {
+        _inherits(Admin_Slot, _TimeSlotModel);
+
+        function Admin_Slot(data) {
+            _classCallCheck(this, Admin_Slot);
+
+            var _this = _possibleConstructorReturn(this, _TimeSlotModel.call(this, data));
+
+            _this.title = _this.full_describe;
+            if (_this.status === 0) {
+                _this.title = "Available";
+            }
+            _this.datetime = moment(_this.datetime);
+            _this.start = _this.datetime;
+            _this.end = _this.end_datetime;
+            _this.end = _this.datetime.clone().add(_this.duration, 'minutes');
+            _this.time = _this.start.hour() * 60 + _this.start.minute();
+            _this.title = _this.full_describe;
+            //   @startEditable  = false
+            //   @durationEditable  = false
+            // set to all day if it's a 24 hours span
+            _this.allDay = false;
+            if (_this.duration_span && _this.duration_span === 86400) {
+                _this.allDay = true;
+            }
+            if (_this.status === 3) {
+                _this.startEditable = true;
+                _this.durationEditable = true;
+                _this.className = "status_blocked";
+            } else if (_this.status === 4) {
+                _this.className = "status_booked";
+            } else if (_this.status === 0) {
+                _this.className = "status_available";
+            }
+            if (_this.multi_status) {
+                for (var k in _this.multi_status) {
+                    _this.className += " status_" + k;
+                }
+            }
+            return _this;
+        }
+
+        Admin_Slot.prototype.useFullTime = function useFullTime() {
+            this.using_full_time = true;
+            if (this.pre_time) {
+                this.start = this.datetime.clone().subtract(this.pre_time, 'minutes');
+            }
+            if (this.post_time) {
+                return this.end = this.datetime.clone().add(this.duration + this.post_time, 'minutes');
+            }
+        };
+
+        Admin_Slot.prototype.$refetch = function $refetch() {
+            var _this2 = this;
+
+            var defer = $q.defer();
+            this.$flush('self');
+            this.$get('self').then(function (res) {
+                _this2.constructor(res);
+                if (_this2.using_full_time) {
+                    _this2.useFullTime();
+                }
+                BookingCollections.checkItems(_this2);
+                return defer.resolve(_this2);
+            }, function (err) {
+                return defer.reject(err);
+            });
+            return defer.promise;
+        };
+
+        Admin_Slot.$query = function $query(params) {
+            var company = void 0;
+            if (params.slot) {
+                params.slot_id = params.slot.id;
+            }
+            if (params.date) {
+                params.start_date = params.date;
+                params.end_date = params.date;
+            }
+            if (params.company) {
+                company = params.company;
+
+                delete params.company;
+                params.company_id = company.id;
+            }
+            if (params.per_page == null) {
+                params.per_page = 1024;
+            }
+            if (params.include_cancelled == null) {
+                params.include_cancelled = false;
+            }
+            var defer = $q.defer();
+            var existing = SlotCollections.find(params);
+            if (existing && !params.skip_cache) {
+                defer.resolve(existing);
+            } else {
+                var src = company;
+                if (!src) {
+                    src = params.src;
+                }
+                if (params.src) {
+                    delete params.src;
+                }
+                if (params.skip_cache) {
+                    if (existing) {
+                        SlotCollections.delete(existing);
+                    }
+                    src.$flush('slots', params);
+                }
+
+                src.$get('slots', params).then(function (resource) {
+                    if (resource.$has('slots')) {
+                        return resource.$get('slots').then(function (slots) {
+                            var models = Array.from(slots).map(function (b) {
+                                return new BBModel.Admin.Slot(b);
+                            });
+                            var spaces = new $window.Collection.Slot(resource, models, params);
+                            SlotCollections.add(spaces);
+                            return defer.resolve(spaces);
+                        }, function (err) {
+                            return defer.reject(err);
+                        });
+                    } else {
+                        var slot = new BBModel.Admin.Slot(resource);
+                        return defer.resolve(slot);
+                    }
+                }, function (err) {
+                    return defer.reject(err);
+                });
+            }
+            return defer.promise;
+        };
+
+        return Admin_Slot;
+    }(TimeSlotModel);
+});
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+angular.module('BB.Models').factory("AdminUserModel", function ($q, BBModel, BaseModel) {
+  return function (_BaseModel) {
+    _inherits(User, _BaseModel);
+
+    function User() {
+      _classCallCheck(this, User);
+
+      return _possibleConstructorReturn(this, _BaseModel.apply(this, arguments));
+    }
+
+    return User;
+  }(BaseModel);
 });
