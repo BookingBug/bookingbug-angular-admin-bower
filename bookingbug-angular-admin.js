@@ -24,7 +24,7 @@ angular.module('BB').config(function (FormTransformProvider) {
 
     FormTransformProvider.setTransform('edit', 'Admin_Booking', function (form, schema, model) {
         var disable_list = void 0;
-        if (model && model.status === 3) {
+        if (model && (model.status === 3 || model.status === 4)) {
             // blocked - don't disable the datetime
             disable_list = ['service', 'person_id', 'resource_id'];
         } else {
@@ -320,6 +320,7 @@ angular.module('BBAdmin.Controllers').controller('CalendarCtrl', function ($scop
                 center: 'title',
                 right: 'today prev,next'
             },
+            ignoreTimezone: false,
             dayClick: $scope.dayClick,
             eventClick: $scope.eventClick,
             eventDrop: $scope.alertOnDrop,
@@ -358,58 +359,61 @@ angular.module('BBAdmin.Controllers').controller('CategoryList', function ($scop
 });
 'use strict';
 
-angular.module('BBAdmin.Directives').directive('bbAdminClients', function () {
-    return {
-        restrict: 'AE',
-        replace: true,
-        scope: true,
-        controller: 'AdminClients',
-        link: function link(scope, element, attrs) {}
-    };
-});
+(function () {
 
-angular.module('BBAdmin.Controllers').controller('AdminClients', function ($scope, $rootScope, $q, $log, AlertService, LoadingService, BBModel) {
+    angular.module('BBAdmin.Directives').directive('bbAdminClients', function () {
+        return {
+            restrict: 'AE',
+            replace: true,
+            scope: true,
+            controller: AdminClientsCtrl
+        };
+    });
 
-    $scope.clientDef = $q.defer();
-    $scope.clientPromise = $scope.clientDef.promise;
-    $scope.per_page = 15;
-    $scope.total_entries = 0;
-    $scope.clients = [];
+    function AdminClientsCtrl($scope, $rootScope, $q, $log, LoadingService, BBModel) {
+        'ngInject';
 
-    var loader = LoadingService.$loader($scope);
+        $scope.clientDef = $q.defer();
+        $scope.clientPromise = $scope.clientDef.promise;
+        $scope.per_page = 15;
+        $scope.total_entries = 0;
+        $scope.clients = [];
 
-    $scope.getClients = function (currentPage, filterBy, filterByFields, orderBy, orderByReverse) {
-        var clientDef = $q.defer();
+        var loader = LoadingService.$loader($scope);
 
-        $rootScope.connection_started.then(function () {
-            loader.notLoaded();
-            var params = {
-                company: $scope.bb.company,
-                per_page: $scope.per_page,
-                page: currentPage + 1,
-                filter_by: filterBy,
-                filter_by_fields: filterByFields,
-                order_by: orderBy,
-                order_by_reverse: orderByReverse
-            };
-            return BBModel.Admin.Client.$query(params).then(function (clients) {
-                $scope.clients = clients.items;
-                loader.setLoaded();
-                $scope.setPageLoaded();
-                $scope.total_entries = clients.total_entries;
-                return clientDef.resolve(clients.items);
-            }, function (err) {
-                clientDef.reject(err);
-                return loader.setLoadedAndShowError(err, 'Sorry, something went wrong');
+        $scope.getClients = function (currentPage, filterBy, filterByFields, orderBy, orderByReverse) {
+            var clientDef = $q.defer();
+
+            $rootScope.connection_started.then(function () {
+                loader.notLoaded();
+                var params = {
+                    company: $scope.bb.company,
+                    per_page: $scope.per_page,
+                    page: currentPage + 1,
+                    filter_by: filterBy,
+                    filter_by_fields: filterByFields,
+                    order_by: orderBy,
+                    order_by_reverse: orderByReverse
+                };
+                return BBModel.Admin.Client.$query(params).then(function (clients) {
+                    $scope.clients = clients.items;
+                    loader.setLoaded();
+                    $scope.setPageLoaded();
+                    $scope.total_entries = clients.total_entries;
+                    return clientDef.resolve(clients.items);
+                }, function (err) {
+                    clientDef.reject(err);
+                    return loader.setLoadedAndShowError(err, 'Sorry, something went wrong');
+                });
             });
-        });
-        return true;
-    };
+            return true;
+        };
 
-    return $scope.edit = function (item) {
-        return $log.info("not implemented");
-    };
-});
+        $scope.edit = function (item) {
+            return $log.info("not implemented");
+        };
+    }
+})();
 'use strict';
 
 angular.module('BBAdmin.Controllers').controller('CompanyList', function ($scope, $rootScope, $location) {
@@ -1340,14 +1344,14 @@ angular.module('BB.Models').factory("AdminBookingModel", function ($q, BBModel, 
             _this.type = 'Admin_Booking';
             _this.datetime = moment(_this.datetime);
             _this.start = _this.datetime;
-            _this.end = _this.end_datetime;
+            _this.end = moment(_this.end_datetime);
             if (!_this.end) {
                 _this.end = _this.datetime.clone().add(_this.duration, 'minutes');
             }
             _this.title = _this.full_describe;
             _this.time = _this.start.hour() * 60 + _this.start.minute();
-            //      @startEditable  = false
-            //      @durationEditable  = false
+            // this.startEditable  = false
+            // this.durationEditable  = false
             // set to all day if it's a 24 hours span
             _this.allDay = false;
             if (_this.duration_span && _this.duration_span === 86400) {
