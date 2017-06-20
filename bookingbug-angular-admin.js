@@ -1366,11 +1366,10 @@ angular.module('BB.Models').factory("AdminBookingModel", function ($q, BBModel, 
             } else if (_this.status === 0) {
                 _this.className = "status_available";
             }
-            if (_this.multi_status) {
-                for (var k in _this.multi_status) {
-                    _this.className += ' status_' + k;
-                }
+            if (_this.current_multi_status) {
+                _this.className = 'status_' + _this.current_multi_status;
             }
+
             return _this;
         }
 
@@ -1821,10 +1820,8 @@ angular.module('BB.Models').factory("AdminSlotModel", function ($q, BBModel, Bas
             } else if (_this.status === 0) {
                 _this.className = "status_available";
             }
-            if (_this.multi_status) {
-                for (var k in _this.multi_status) {
-                    _this.className += " status_" + k;
-                }
+            if (_this.current_multi_status) {
+                _this.className = "status_" + _this.current_multi_status;
             }
             return _this;
         }
@@ -2216,8 +2213,8 @@ angular.module('BBAdmin.Services').factory('ColorPalette', function () {
     { primary: '#3D9970', secondary: '#163728' }, // Olive
     { primary: '#85144B', secondary: '#EB7AB1' }, // Maroon
     { primary: '#2ECC40', secondary: '#0E3E14' }, // Green
-    { primary: '#FF851B', secondary: '#663000' } // Orange
-    ];
+    { primary: '#FF851B', secondary: '#663000' // Orange
+    }];
 
     return {
         setColors: function setColors(models) {
