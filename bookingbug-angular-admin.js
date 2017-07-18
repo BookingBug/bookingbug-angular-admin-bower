@@ -2508,6 +2508,7 @@ angular.module('BBAdmin.Services').factory("AdminLoginService", function ($q, ha
                 $sessionStorage.removeItem("auth_token");
                 $cookies.remove('Auth-Token');
                 shared_header.del('auth_token');
+
                 return defer.resolve();
             }, function () {
                 return defer.reject();
