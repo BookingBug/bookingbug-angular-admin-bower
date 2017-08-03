@@ -2506,6 +2506,7 @@ angular.module('BBAdmin.Services').factory("AdminLoginService", function ($q, ha
                 $rootScope.user = null;
                 $sessionStorage.removeItem("user");
                 $sessionStorage.removeItem("auth_token");
+                $sessionStorage.removeItem('sso_token');
                 $cookies.remove('Auth-Token');
                 shared_header.del('auth_token');
 
