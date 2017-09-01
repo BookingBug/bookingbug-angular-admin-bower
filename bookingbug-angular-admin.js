@@ -1353,8 +1353,10 @@ angular.module('BB.Models').factory("AdminBookingModel", function ($q, BBModel, 
             // this.startEditable  = false
             // this.durationEditable  = false
             // set to all day if it's a 24 hours span
-            _this.allDay = _this.duration_span && _this.duration_span === 86400;
-
+            _this.allDay = false;
+            if (_this.duration_span && _this.duration_span === 86400) {
+                _this.allDay = true;
+            }
             if (_this.status === 3) {
                 _this.startEditable = true;
                 _this.durationEditable = true;
@@ -1419,10 +1421,6 @@ angular.module('BB.Models').factory("AdminBookingModel", function ($q, BBModel, 
 
         Admin_Booking.prototype.hasStatus = function hasStatus(status) {
             return this.multi_status[status] != null;
-        };
-
-        Admin_Booking.prototype.labelStatus = function labelStatus() {
-            return BBLabelStatus.labelStatus(this.current_multi_status);
         };
 
         Admin_Booking.prototype.statusTime = function statusTime(status) {
@@ -2508,7 +2506,6 @@ angular.module('BBAdmin.Services').factory("AdminLoginService", function ($q, ha
                 $rootScope.user = null;
                 $sessionStorage.removeItem("user");
                 $sessionStorage.removeItem("auth_token");
-                $sessionStorage.removeItem('sso_token');
                 $cookies.remove('Auth-Token');
                 shared_header.del('auth_token');
 
