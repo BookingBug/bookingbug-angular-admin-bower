@@ -2832,9 +2832,49 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
 
 (function() {
   angular.module('BBAdmin.Services').factory('AdminClientService', function($q, $window, $rootScope, halClient, ClientCollections, BBModel, UriTemplate) {
+    var halClientFn;
+    halClientFn = function(prms, href) {
+      var deferred, uri;
+      uri = new UriTemplate(href).fillFromObject(prms || {});
+      deferred = $q.defer();
+      if (prms.flush) {
+        halClient.clearCache(uri);
+      }
+      halClient.$get(uri, {}).then((function(_this) {
+        return function(resource) {
+          var client;
+          if (resource.$has('clients')) {
+            return resource.$get('clients').then(function(items) {
+              var clients, i, people;
+              people = (function() {
+                var j, len, results;
+                results = [];
+                for (j = 0, len = items.length; j < len; j++) {
+                  i = items[j];
+                  results.push(new BBModel.Client(i));
+                }
+                return results;
+              })();
+              clients = new $window.Collection.Client(resource, people, prms);
+              clients.total_entries = resource.total_entries;
+              ClientCollections.add(clients);
+              return deferred.resolve(clients);
+            });
+          } else {
+            client = new BBModel.Client(resource);
+            return deferred.resolve(client);
+          }
+        };
+      })(this), (function(_this) {
+        return function(err) {
+          return deferred.reject(err);
+        };
+      })(this));
+      return deferred.promise;
+    };
     return {
       query: function(prms) {
-        var deferred, href, uri, url;
+        var href, url;
         if (prms.company) {
           prms.company_id = prms.company.id;
         }
@@ -2843,42 +2883,19 @@ angular.module('BBAdmin.Directives').controller('CalController', function($scope
           url = $rootScope.bb.api_url;
         }
         href = url + "/api/v1/admin/{company_id}/client{/id}{?page,per_page,filter_by,filter_by_fields,order_by,order_by_reverse,search_by_fields,default_company_id}";
-        uri = new UriTemplate(href).fillFromObject(prms || {});
-        deferred = $q.defer();
-        if (prms.flush) {
-          halClient.clearCache(uri);
+        return halClientFn(prms, href);
+      },
+      queryByRef: function(prms) {
+        var href, url;
+        if (prms.company) {
+          prms.company_id = prms.company.id;
         }
-        halClient.$get(uri, {}).then((function(_this) {
-          return function(resource) {
-            var client;
-            if (resource.$has('clients')) {
-              return resource.$get('clients').then(function(items) {
-                var clients, i, people;
-                people = (function() {
-                  var j, len, results;
-                  results = [];
-                  for (j = 0, len = items.length; j < len; j++) {
-                    i = items[j];
-                    results.push(new BBModel.Client(i));
-                  }
-                  return results;
-                })();
-                clients = new $window.Collection.Client(resource, people, prms);
-                clients.total_entries = resource.total_entries;
-                ClientCollections.add(clients);
-                return deferred.resolve(clients);
-              });
-            } else {
-              client = new BBModel.Client(resource);
-              return deferred.resolve(client);
-            }
-          };
-        })(this), (function(_this) {
-          return function(err) {
-            return deferred.reject(err);
-          };
-        })(this));
-        return deferred.promise;
+        url = "";
+        if ($rootScope.bb.api_url) {
+          url = $rootScope.bb.api_url;
+        }
+        href = url + "/api/v1/admin/{company_id}/client/find_by_ref/query{?ref}";
+        return halClientFn(prms, href);
       },
       update: function(client) {
         var deferred;
