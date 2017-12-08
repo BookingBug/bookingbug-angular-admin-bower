@@ -1922,7 +1922,7 @@ angular.module('BB.Models').factory("AdminSlotModel", function ($q, BBModel, Bas
         return Admin_Slot;
     }(TimeSlotModel);
 });
-"use strict";
+'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1931,17 +1931,229 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 angular.module('BB.Models').factory("AdminUserModel", function ($q, BBModel, BaseModel) {
-  return function (_BaseModel) {
-    _inherits(User, _BaseModel);
+    'ngInject';
 
-    function User() {
-      _classCallCheck(this, User);
+    var User = function (_BaseModel) {
+        _inherits(User, _BaseModel);
 
-      return _possibleConstructorReturn(this, _BaseModel.apply(this, arguments));
-    }
+        function User(data) {
+            _classCallCheck(this, User);
+
+            var _this = _possibleConstructorReturn(this, _BaseModel.call(this, data));
+
+            _this.isParent = false;
+            return _this;
+        }
+
+        User.prototype.setParentRole = function setParentRole() {
+            var isParent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+            this.isParent = isParent;
+        };
+
+        User.prototype.getOriginalRole = function getOriginalRole() {
+            return this.role;
+        };
+
+        User.prototype.getRole = function getRole() {
+            if (this.isParent) return 'parent-' + this.role;
+            return this.role;
+        };
+
+        return User;
+    }(BaseModel);
 
     return User;
-  }(BaseModel);
+});
+'use strict';
+
+angular.module('BBAdmin.Services').factory("AdminLoginService", function ($q, halClient, $rootScope, BBModel, $sessionStorage, $cookies, UriTemplate, shared_header) {
+
+    return {
+        login: function login(form, options) {
+            var _this = this;
+
+            var login_model = void 0;
+            var deferred = $q.defer();
+            var url = $rootScope.bb.api_url + '/api/v1/login/admin';
+            if (options != null && options.company_id != null) {
+                url = url + '/' + options.company_id;
+            }
+
+            halClient.$post(url, options, form).then(function (login) {
+                if (login.$has('administrator')) {
+                    return login.$get('administrator').then(function (user) {
+                        // user.setOption('auth_token', login.getOption('auth_token'))
+                        user = _this.setLogin(user);
+                        return deferred.resolve(user);
+                    });
+                } else if (login.$has('administrators')) {
+                    login_model = new BBModel.Admin.Login(login);
+                    return deferred.resolve(login_model);
+                } else {
+                    return deferred.reject("No admin account for login");
+                }
+            }, function (err) {
+                if (err.status === 400) {
+                    var login = halClient.$parse(err.data);
+                    if (login.$has('administrators')) {
+                        login_model = new BBModel.Admin.Login(login);
+                        return deferred.resolve(login_model);
+                    } else {
+                        return deferred.reject(err);
+                    }
+                } else {
+                    return deferred.reject(err);
+                }
+            });
+            return deferred.promise;
+        },
+        ssoLogin: function ssoLogin(options, data) {
+            var _this2 = this;
+
+            var deferred = $q.defer();
+            var url = $rootScope.bb.api_url + "/api/v1/login/sso/" + options['company_id'];
+
+            halClient.$post(url, {}, data).then(function (login) {
+                return login.$get('user').then(function (user) {
+                    user = _this2.setLogin(user);
+                    return deferred.resolve(user);
+                });
+            }, function (err) {
+                return deferred.reject(err);
+            });
+            return deferred.promise;
+        },
+        isLoggedIn: function isLoggedIn() {
+            var deferred = $q.defer();
+            this.checkLogin().then(function () {
+                if ($rootScope.user) {
+                    return deferred.resolve(true);
+                } else {
+                    return deferred.reject(false);
+                }
+            }, function (err) {
+                return deferred.reject(false);
+            });
+            return deferred.promise;
+        },
+        setLogin: function setLogin(user) {
+            user = new BBModel.Admin.User(user);
+            var auth_token = user.getOption('auth_token');
+            $sessionStorage.setItem("user", user.$toStore());
+            $sessionStorage.setItem("auth_token", auth_token);
+            $rootScope.user = user;
+            return user;
+        },
+        user: function user() {
+            return this.checkLogin().then(function () {
+                return $rootScope.user;
+            });
+        },
+        checkLogin: function checkLogin(params) {
+            if (params == null) {
+                params = {};
+            }
+            var defer = $q.defer();
+            if ($rootScope.user) {
+                defer.resolve();
+            }
+            var user = $sessionStorage.getItem("user");
+            if (user) {
+                $rootScope.user = new BBModel.Admin.User(halClient.createResource(user));
+                defer.resolve();
+            } else {
+                var auth_token = $cookies.get('Auth-Token');
+                if (auth_token) {
+                    var url = void 0;
+                    if ($rootScope.bb.api_url) {
+                        url = $rootScope.bb.api_url + '/api/v1/login{?id,role}';
+                    } else {
+                        url = "/api/v1/login{?id,role}";
+                    }
+                    params.id = params.companyId || params.company_id;
+                    params.role = 'admin';
+                    var href = new UriTemplate(url).fillFromObject(params || {});
+                    var options = { auth_token: auth_token };
+                    halClient.$get(href, options).then(function (login) {
+                        if (login.$has('administrator')) {
+                            return login.$get('administrator').then(function (user) {
+                                $rootScope.user = new BBModel.Admin.User(user);
+                                return defer.resolve();
+                            });
+                        } else {
+                            return defer.resolve();
+                        }
+                    }, function () {
+                        return defer.resolve();
+                    });
+                } else {
+                    defer.resolve();
+                }
+            }
+            return defer.promise;
+        },
+        logout: function logout() {
+            var defer = $q.defer();
+            var url = $rootScope.bb.api_url + '/api/v1/login';
+            halClient.$del(url).finally(function () {
+                $rootScope.user = null;
+                $sessionStorage.removeItem("user");
+                $sessionStorage.removeItem("auth_token");
+                $sessionStorage.removeItem('sso_token');
+                $cookies.remove('Auth-Token');
+                shared_header.del('auth_token');
+
+                return defer.resolve();
+            }, function () {
+                return defer.reject();
+            });
+            return defer.promise;
+        },
+        getLogin: function getLogin(options) {
+            var _this3 = this;
+
+            var defer = $q.defer();
+            var url = $rootScope.bb.api_url + '/api/v1/login/admin/' + options.company_id;
+            halClient.$get(url, options).then(function (login) {
+                if (login.$has('administrator')) {
+                    return login.$get('administrator').then(function (user) {
+                        user = _this3.setLogin(user);
+                        return defer.resolve(user);
+                    }, function (err) {
+                        return defer.reject(err);
+                    });
+                } else {
+                    return defer.reject();
+                }
+            }, function (err) {
+                return defer.reject(err);
+            });
+            return defer.promise;
+        },
+        setCompany: function setCompany(company_id) {
+            var _this4 = this;
+
+            var defer = $q.defer();
+            var url = $rootScope.bb.api_url + '/api/v1/login/admin';
+            var params = { company_id: company_id };
+            halClient.$put(url, {}, params).then(function (login) {
+                if (login.$has('administrator')) {
+                    return login.$get('administrator').then(function (user) {
+                        user = _this4.setLogin(user);
+                        return defer.resolve(user);
+                    }, function (err) {
+                        return defer.reject(err);
+                    });
+                } else {
+                    return defer.reject();
+                }
+            }, function (err) {
+                return defer.reject(err);
+            });
+            return defer.promise;
+        }
+    };
 });
 'use strict';
 
@@ -2230,7 +2442,7 @@ angular.module('BBAdmin.Services').factory('ColorPalette', function () {
 });
 'use strict';
 
-angular.module('BBAdmin.Services').factory('AdminCompanyService', function ($q, $rootScope, $sessionStorage, BBModel) {
+angular.module('BBAdmin.Services').factory('AdminCompanyService', function ($q, $rootScope, $sessionStorage, BBModel, halClient, UriTemplate) {
 
     return {
         query: function query(params) {
@@ -2278,6 +2490,37 @@ angular.module('BBAdmin.Services').factory('AdminCompanyService', function ($q, 
                 }
             });
             return defer.promise;
+        },
+        buildCompanyModels: function buildCompanyModels(baseResources) {
+            return Array.from(baseResources).map(function (company) {
+                return new BBModel.Admin.Company(company);
+            });
+        },
+        searchChildren: function searchChildren(params) {
+            var _this = this;
+
+            var searchChildrenPromise = $q.defer();
+            var apiUrl = $rootScope.bb.api_url;
+            var uri = apiUrl + ('/api/v1/company/' + params.companyId + '/search?company[text]=' + params.searchValue);
+            halClient.$get(uri, {}).then(function (result) {
+                return _this.handleCompanySearchResponse(result, searchChildrenPromise);
+            }).catch(function (err) {
+                return searchChildrenPromise.reject(err);
+            });
+
+            return searchChildrenPromise.promise;
+        },
+        handleCompanySearchResponse: function handleCompanySearchResponse(result, searchChildrenPromise) {
+            var _this2 = this;
+
+            if (result.$has('companies')) {
+                result.$get('companies').then(function (companyBaseResources) {
+                    var companyModels = _this2.buildCompanyModels(companyBaseResources);
+                    searchChildrenPromise.resolve(companyModels);
+                });
+            } else {
+                searchChildrenPromise.resolve();
+            }
         }
     };
 });
@@ -2370,196 +2613,6 @@ angular.module('BBAdmin.Services').factory('AdminDayService', function ($q, $win
             });
 
             return deferred.promise;
-        }
-    };
-});
-'use strict';
-
-angular.module('BBAdmin.Services').factory("AdminLoginService", function ($q, halClient, $rootScope, BBModel, $sessionStorage, $cookies, UriTemplate, shared_header) {
-
-    return {
-        login: function login(form, options) {
-            var _this = this;
-
-            var login_model = void 0;
-            var deferred = $q.defer();
-            var url = $rootScope.bb.api_url + '/api/v1/login/admin';
-            if (options != null && options.company_id != null) {
-                url = url + '/' + options.company_id;
-            }
-
-            halClient.$post(url, options, form).then(function (login) {
-                if (login.$has('administrator')) {
-                    return login.$get('administrator').then(function (user) {
-                        // user.setOption('auth_token', login.getOption('auth_token'))
-                        user = _this.setLogin(user);
-                        return deferred.resolve(user);
-                    });
-                } else if (login.$has('administrators')) {
-                    login_model = new BBModel.Admin.Login(login);
-                    return deferred.resolve(login_model);
-                } else {
-                    return deferred.reject("No admin account for login");
-                }
-            }, function (err) {
-                if (err.status === 400) {
-                    var login = halClient.$parse(err.data);
-                    if (login.$has('administrators')) {
-                        login_model = new BBModel.Admin.Login(login);
-                        return deferred.resolve(login_model);
-                    } else {
-                        return deferred.reject(err);
-                    }
-                } else {
-                    return deferred.reject(err);
-                }
-            });
-            return deferred.promise;
-        },
-        ssoLogin: function ssoLogin(options, data) {
-            var _this2 = this;
-
-            var deferred = $q.defer();
-            var url = $rootScope.bb.api_url + "/api/v1/login/sso/" + options['company_id'];
-
-            halClient.$post(url, {}, data).then(function (login) {
-                return login.$get('user').then(function (user) {
-                    user = _this2.setLogin(user);
-                    return deferred.resolve(user);
-                });
-            }, function (err) {
-                return deferred.reject(err);
-            });
-            return deferred.promise;
-        },
-        isLoggedIn: function isLoggedIn() {
-            var deferred = $q.defer();
-            this.checkLogin().then(function () {
-                if ($rootScope.user) {
-                    return deferred.resolve(true);
-                } else {
-                    return deferred.reject(false);
-                }
-            }, function (err) {
-                return deferred.reject(false);
-            });
-            return deferred.promise;
-        },
-        setLogin: function setLogin(user) {
-            user = new BBModel.Admin.User(user);
-            var auth_token = user.getOption('auth_token');
-            $sessionStorage.setItem("user", user.$toStore());
-            $sessionStorage.setItem("auth_token", auth_token);
-            $rootScope.user = user;
-            return user;
-        },
-        user: function user() {
-            return this.checkLogin().then(function () {
-                return $rootScope.user;
-            });
-        },
-        checkLogin: function checkLogin(params) {
-            if (params == null) {
-                params = {};
-            }
-            var defer = $q.defer();
-            if ($rootScope.user) {
-                defer.resolve();
-            }
-            var user = $sessionStorage.getItem("user");
-            if (user) {
-                $rootScope.user = new BBModel.Admin.User(halClient.createResource(user));
-                defer.resolve();
-            } else {
-                var auth_token = $cookies.get('Auth-Token');
-                if (auth_token) {
-                    var url = void 0;
-                    if ($rootScope.bb.api_url) {
-                        url = $rootScope.bb.api_url + '/api/v1/login{?id,role}';
-                    } else {
-                        url = "/api/v1/login{?id,role}";
-                    }
-                    params.id = params.companyId || params.company_id;
-                    params.role = 'admin';
-                    var href = new UriTemplate(url).fillFromObject(params || {});
-                    var options = { auth_token: auth_token };
-                    halClient.$get(href, options).then(function (login) {
-                        if (login.$has('administrator')) {
-                            return login.$get('administrator').then(function (user) {
-                                $rootScope.user = new BBModel.Admin.User(user);
-                                return defer.resolve();
-                            });
-                        } else {
-                            return defer.resolve();
-                        }
-                    }, function () {
-                        return defer.resolve();
-                    });
-                } else {
-                    defer.resolve();
-                }
-            }
-            return defer.promise;
-        },
-        logout: function logout() {
-            var defer = $q.defer();
-            var url = $rootScope.bb.api_url + '/api/v1/login';
-            halClient.$del(url).finally(function () {
-                $rootScope.user = null;
-                $sessionStorage.removeItem("user");
-                $sessionStorage.removeItem("auth_token");
-                $sessionStorage.removeItem('sso_token');
-                $cookies.remove('Auth-Token');
-                shared_header.del('auth_token');
-
-                return defer.resolve();
-            }, function () {
-                return defer.reject();
-            });
-            return defer.promise;
-        },
-        getLogin: function getLogin(options) {
-            var _this3 = this;
-
-            var defer = $q.defer();
-            var url = $rootScope.bb.api_url + '/api/v1/login/admin/' + options.company_id;
-            halClient.$get(url, options).then(function (login) {
-                if (login.$has('administrator')) {
-                    return login.$get('administrator').then(function (user) {
-                        user = _this3.setLogin(user);
-                        return defer.resolve(user);
-                    }, function (err) {
-                        return defer.reject(err);
-                    });
-                } else {
-                    return defer.reject();
-                }
-            }, function (err) {
-                return defer.reject(err);
-            });
-            return defer.promise;
-        },
-        setCompany: function setCompany(company_id) {
-            var _this4 = this;
-
-            var defer = $q.defer();
-            var url = $rootScope.bb.api_url + '/api/v1/login/admin';
-            var params = { company_id: company_id };
-            halClient.$put(url, {}, params).then(function (login) {
-                if (login.$has('administrator')) {
-                    return login.$get('administrator').then(function (user) {
-                        user = _this4.setLogin(user);
-                        return defer.resolve(user);
-                    }, function (err) {
-                        return defer.reject(err);
-                    });
-                } else {
-                    return defer.reject();
-                }
-            }, function (err) {
-                return defer.reject(err);
-            });
-            return defer.promise;
         }
     };
 });
