@@ -19,7 +19,7 @@
     "tests"
   ],
   "dependencies": {
-    "bookingbug-angular-core": "1.4.118"
+    "bookingbug-angular-core": "git://github.com/optima-health/bookingbug-angular-core-bower#1.4.118"
   },
   "resolutions": {
     "angular": "1.2.28"
