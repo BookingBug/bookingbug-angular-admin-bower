@@ -1108,7 +1108,7 @@
 
     Booking.prototype.matchesParams = function(item) {
       if (this.params.start_date != null) {
-        if (this.start_date == null) {
+        if (this.start_date == null || typeof this.start_date === 'string') {
           this.start_date = moment(this.params.start_date);
         }
         if (this.start_date.isAfter(item.start)) {
@@ -1116,7 +1116,7 @@
         }
       }
       if (this.params.end_date != null) {
-        if (this.end_date == null) {
+        if (this.end_date == null || typeof this.end_date === 'string') {
           this.end_date = moment(this.params.end_date);
         }
         if (this.end_date.isBefore(item.start.clone().startOf('day'))) {
